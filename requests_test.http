@@ -1,0 +1,183 @@
+# регистрация пользователя (менеджера магазина из пользователя безопасно делать в админке джанго)
+POST http://localhost:8000/api/v1/user/register
+Content-Type: application/json
+
+{
+  "first_name": "Иван",
+  "last_name": "Иванов",
+  "email": "user1@tips-tricks.ru",
+  "password": "888Xxx444~",
+  "company": "SpaceY",
+  "position": "python backend"
+}
+
+###
+
+# подтверждение регистрации по ссылке на почте
+# значение токена взять из БД из таблицы confirmemailtoken
+GET http://localhost:8000/api/v1/user/register/confirm?token=556c6d1de765bdb3eb8d&email=user1@tips-tricks.ru
+
+###
+
+# аутентификация пользователя (login)
+POST http://localhost:8000/api/v1/user/login
+Content-Type: application/json
+
+{
+  "email": "user1@tips-tricks.ru",
+  "password": "Qqq111!!!"
+}
+
+###
+
+# выход пользователя (logout)
+# Сначала использовал GET, но браузер думает, что снова заходим на эту страницу - не корректно, поэтому POST
+# https://stackoverflow.com/questions/3521290/logout-get-or-post
+POST http://localhost:8000/api/v1/user/logout
+Authorization: Token 3456500386ca40dc24a9d62c20fb6f0e79c9747c  # токен взять из БД из таблицы authtoken_token
+
+###
+
+# user details (просмотр своих данных)
+GET http://localhost:8000/api/v1/user/details
+Authorization: Token 556c6d1de765bdb3eb8d  # токен взять из БД из таблицы authtoken_token
+
+###
+
+# user details (редактирование своих данных)
+POST http://localhost:8000/api/v1/user/details
+Authorization: Token 556c6d1de765bdb3eb8d  # токен взять из БД из таблицы authtoken_token
+Content-Type: application/json
+
+{
+  "first_name": "Иван1",
+  "last_name": "Иванов1"
+}
+
+###
+
+
+# user contact (добавить новый контакт)
+POST http://localhost:8000/api/v1/user/contact
+Authorization: Token c5a064b64830300ffd9d202d3c101f80cc1d71e2  # токен взять из БД из таблицы authtoken_token
+Content-Type: application/json
+
+{
+  "city": "Владивосток",
+  "street": "Хабаровская",
+  "house": "7",
+  "phone": "987654321"
+}
+
+###
+
+# user contact (просмотр своего контакта (контактов))
+GET http://localhost:8000/api/v1/user/contact
+Authorization: Token c5a064b64830300ffd9d202d3c101f80cc1d71e2  # токен взять из БД из таблицы authtoken_token
+
+###
+
+# user contact (редактирование своего контакта). id передаётся строкой из цифр!
+PATCH http://localhost:8000/api/v1/user/contact
+Authorization: Token c5a064b64830300ffd9d202d3c101f80cc1d71e2  # токен взять из БД из таблицы authtoken_token
+Content-Type: application/json
+
+{
+  "id": "2",
+  "house": "7",
+  "phone": "89161112233"
+}
+
+###
+
+# user contact (удаление своего контакта или сразу нескольких своих контактов)
+# id удаляемых контактов указываеются через запятую с пробелом в параметре items"
+DELETE http://localhost:8000/api/v1/user/contact
+Authorization: Token c5a064b64830300ffd9d202d3c101f80cc1d71e2  # токен взять из БД из таблицы authtoken_token
+Content-Type: application/json
+
+{
+  "items": "11, 12, 13"
+}
+
+###
+
+# запрос на сброс пароля reset_password_request_token
+# на почту приходит новый токен
+POST http://localhost:8000/api/v1/user/password_reset
+Authorization: Token c5a064b64830300ffd9d202d3c101f80cc1d71e2
+Content-Type: application/json
+
+{
+  "email": "user1@tips-tricks.ru"
+}
+
+###
+
+# сброс пароля токеном из почты из предыдущего запроса
+POST http://localhost:8000/api/v1/user/password_reset/confirm
+Authorization: Token c5a064b64830300ffd9d202d3c101f80cc1d71e2
+Content-Type: application/json
+
+{
+  "token": "730c7f1616",
+  "password": "Qqq111!!!"
+}
+
+###
+
+# регистрируем изначально менеджера как пользователя. далее активация через почту и в админке выставляем ему менеджера.
+POST http://localhost:8000/api/v1/user/register
+Content-Type: application/json
+
+{
+  "first_name": "Андрей",
+  "last_name": "Андреев",
+  "email": "manager1@tips-tricks.ru",
+  "password": "Qqq111!!!",
+  "company": "Ozone",
+  "position": "manager"
+}
+
+###
+
+# аутентификация менеджера (login)
+POST http://localhost:8000/api/v1/user/login
+Content-Type: application/json
+
+{
+  "email": "manager1@tips-tricks.ru",
+  "password": "Qqq111!!!"
+}
+
+###
+
+# GET upload_file
+GET http://localhost:8000/api/v1/partner/upload_file
+Authorization: Token 40e578c55750437e1c18393d2e41e1cedd41e560
+
+###
+
+# загрузка менеджером файла с товарами в БД
+# открыть в браузере форму загрузки файлов, ввести данные
+POST http://localhost:8000/api/v1/partner/upload_file/
+Authorization: Token 40e578c55750437e1c18393d2e41e1cedd41e560
+Content-Type: application/json
+
+{
+  "name": "shop1",
+  "file": "C:\Users\konst\Desktop\PYTHON\shop1.yaml"
+}
+
+
+###
+
+# обновление прайса менеджером (загрузка в БД товаров магазина)
+# заменить на свой url с файлом товаров
+POST http://localhost:8000/api/v1/partner/update
+Authorization: Token e60996aa18
+Content-Type: application/json
+
+{
+  "url": "http://disk.yandex.ru/d/zuv0grZnySQY7A"
+}
