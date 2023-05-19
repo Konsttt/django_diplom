@@ -39,7 +39,8 @@ def password_reset_token_created(sender, instance, reset_password_token, **kwarg
 @receiver(new_user_registered)
 def new_user_registered_signal(user_id, **kwargs):
     """
-    отправляем письмо с подтрердждением почты
+    Отправляем письмо с подтверждением аккаунта на почту пользователя.
+    (По переходу по ссылке в письме пользователь активируется)
     """
     # send an e-mail to the user
     token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user_id)
@@ -58,7 +59,7 @@ def new_user_registered_signal(user_id, **kwargs):
 
 
 @receiver(new_order)
-def new_order_signal(user_id, **kwargs):
+def new_order_signal(user_id, order_sum, **kwargs):
     """
     отправяем письмо при изменении статуса заказа
     """
@@ -69,7 +70,7 @@ def new_order_signal(user_id, **kwargs):
         # title:
         f"Обновление статуса заказа",
         # message:
-        'Заказ сформирован',
+        f'Заказ на сумму {order_sum} сформирован',
         # from:
         settings.EMAIL_HOST_USER,
         # to:

@@ -9,7 +9,7 @@
 {% block content %}
 <form method="POST" novalidate>
 	<h2>Login</h2>
-{#    {% csrf_token %}#}
+    {% csrf_token %}
 	{{form.as_p}}
 	<input type="submit" value="Login" />
 </form>

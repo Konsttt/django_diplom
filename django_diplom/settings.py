@@ -31,9 +31,9 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
 
-SESSION_COOKIE_SECURE = False  # Долго же я помучился. На локалхост в браузере куки сессии не хранятся!!! Ссылка ниже.
-SESSION_COOKIE_DOMAIN = "127.0.0.1"  #  https://code.djangoproject.com/ticket/10560  Решений нет. Только Postman.
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+# SESSION_COOKIE_SECURE = True  # Долго же я помучился. На локалхост в браузере куки сессии не хранятся!!! Ссылка ниже.
+# SESSION_COOKIE_DOMAIN = "127.0.0.1"  #  https://code.djangoproject.com/ticket/10560  Решений нет. Только Postman.
+# SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 # Application definition
 
@@ -41,10 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
+    'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'backend.apps.BackendConfig',  # для создания пользовательских юзеров
+    # 'backend.apps.BackendConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
@@ -131,11 +131,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
-# для создания пользовательской модели юзера на основе класса AbstractUser
+# Для создания пользовательской модели юзера на основе класса AbstractUser.
 AUTH_USER_MODEL = 'backend.User'  # https://django.fun/ru/articles/tutorials/django-custom-user-model/
 
 # EMAIL
@@ -165,7 +164,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.BasicAuthentication',  # комментировал - работало
         'rest_framework.authentication.TokenAuthentication',
 
     ),

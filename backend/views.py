@@ -9,7 +9,7 @@ from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.generic import FormView
+
 from requests import get
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
@@ -38,7 +38,6 @@ class RegisterAccount(APIView):
             errors = {}
 
             # проверяем пароль на сложность
-
             try:
                 validate_password(request.data['password'])
             except Exception as password_error:
@@ -97,7 +96,7 @@ class AccountDetails(APIView):
     Класс для работы с данными пользователя
     """
 
-    # получить данные
+    # получить данные пользователя
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -109,10 +108,10 @@ class AccountDetails(APIView):
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-        # проверяем обязательные аргументы
 
+        # проверяем обязательные аргументы
         if 'password' in request.data:
-            errors = {}
+            # errors = {}
             # проверяем пароль на сложность
             try:
                 validate_password(request.data['password'])
@@ -176,6 +175,7 @@ class LogoutAccount(APIView):
         return JsonResponse({'Status': False, 'Message': 'May be wrong token'})
 
 
+# по умолчанию только get метод, если в классе не определён ни один метод
 class CategoryView(ListAPIView):
     """
     Класс для просмотра категорий
@@ -184,6 +184,7 @@ class CategoryView(ListAPIView):
     serializer_class = CategorySerializer
 
 
+# по умолчанию только get метод
 class ShopView(ListAPIView):
     """
     Класс для просмотра списка магазинов
@@ -194,7 +195,7 @@ class ShopView(ListAPIView):
 
 class ProductInfoView(APIView):
     """
-    Класс для поиска товаров
+    Класс для поиска товаров по магазину и/или категории товаров
     """
     def get(self, request, *args, **kwargs):
 
@@ -222,6 +223,7 @@ class ProductInfoView(APIView):
 class BasketView(APIView):
     """
     Класс для работы с корзиной пользователя
+    работа с таблицами Order - корзина пользователя/заказ и OrderView товары из корзины/заказа пользователя
     """
 
     # получить корзину
@@ -237,7 +239,9 @@ class BasketView(APIView):
         serializer = OrderSerializer(basket, many=True)
         return Response(serializer.data)
 
-    # редактировать корзину
+    # Создать корзину (добавить в корзину товары)
+    # Перед добавлением в корзину первого товара - создаётся корзина пользователя - одна запись в таблице Order (basket)
+    # А так же в OrderItem - запись с выбранным товаром, id-корзины из Order(куда его положили), и кол-во товаров
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -290,7 +294,7 @@ class BasketView(APIView):
                 return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-    # добавить позиции в корзину
+    # изменить позиции в корзине
     def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -495,7 +499,7 @@ class ContactView(APIView):
 
 class OrderView(APIView):
     """
-    Класс для получения и размешения заказов пользователями
+    Класс для получения и размещения заказов пользователями
     """
 
     # получить мои заказы
@@ -511,7 +515,7 @@ class OrderView(APIView):
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data)
 
-    # разместить заказ из корзины
+    # Оформление заказа из корзины. Статус заказа меняется с basket на new. Заказчику отправляется письмо-подтверждение.
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -520,7 +524,7 @@ class OrderView(APIView):
             if request.data['id'].isdigit():
                 try:
                     is_updated = Order.objects.filter(
-                        user_id=request.user.id, id=request.data['id']).update(
+                        user_id=request.user.id, id=int(request.data['id'])).update(
                         contact_id=request.data['contact'],
                         state='new')
                 except IntegrityError as error:
@@ -528,39 +532,41 @@ class OrderView(APIView):
                     return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
                 else:
                     if is_updated:
-                        new_order.send(sender=self.__class__, user_id=request.user.id)
+                        # Формируем общую сумму нового заказа (по id-заказа и id-пользователя)
+                        order = Order.objects.filter(
+                            user_id=request.user.id, id=int(request.data['id'])).prefetch_related(
+                            'ordered_items__product_info__product__category',
+                            'ordered_items__product_info__product_parameters__parameter').select_related(
+                            'contact').annotate(
+                            total_sum=Sum(
+                                F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
+                        serializer = OrderSerializer(order, many=True)
+                        order_sum = serializer.data[0]['total_sum']
+                        # Отправка письма пользователю, о том что заказ оформлен и общую сумму.
+                        new_order.send(sender=self.__class__, user_id=request.user.id, order_sum=order_sum)
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
-# # загрузка файлов с товарами в БД через форму в браузере (способ1)
-# def upload_files(request):
-#     if request.method == 'POST':
-#         form = UploadFilesForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             return HttpResponseRedirect("/")
-#     else:
-#         form = UploadFilesForm
-#     return render(request, 'backend/upload.html', {'form': form})
+class UploadFilesView(APIView):
+    """
+   Загрузка файлов с товарами с локального компьютера в БД через форму в браузере.
 
-# загрузка файлов с товарами в БД через форму в браузере (способ1)
-class UploadFilesView(APIView):  # FormView
+   В браузере на localhost не получится тестировать, т.к. не хранит токены/сессии именно с localhost, или точнее
+   в целях безопасности на уровне django это заблокировано - https://code.djangoproject.com/ticket/10560
+   Решение - Postman, или развернуть на удалённом сервере и тестировать.
+   (файлы в папку медиа можно также загружать через админку джанго. Эту форму в админку добавил)
+   """
 
     def post(self, request, *args, **kwargs):
+        # Проверка по токену
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
-        # ! Проверка, что аутентифицированный пользователь - менеджер магазина
+        # Проверка, что аутентифицированный пользователь - менеджер магазина
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
-
-        # if {'name', 'file'}.issubset(request.data):
-        #     # request.data.update({'user': request.user.id, 'email': request.user.email})
-        #     initial = {'user': request.user.id, 'email': request.user.email}
-        # else:
-        #     return JsonResponse({'Status': False, 'Errors': 'Не указаны имя или путь к файлу'})
 
         form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
@@ -571,9 +577,11 @@ class UploadFilesView(APIView):  # FormView
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
-        # ! Проверка, что аутентифицированный пользователь - менеджер магазина
+        # Проверка, что аутентифицированный пользователь - менеджер магазина
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+        # ! Автоматическое заполнение скрытых полей формы - user (id) и email: initial !
         form = UploadFilesForm(initial={'user': self.request.user.id, 'email': self.request.user.email})
-        # form.instance.user.email = request.user.email
+        # В результате get-запроса отображается форма с двумя полями ввода - имя файла и загрузка файла,
+        # и кнопка Загрузить.
         return render(request, 'backend/upload.html', {'form': form})

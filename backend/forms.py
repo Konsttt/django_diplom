@@ -8,6 +8,7 @@ class UploadFilesForm(forms.ModelForm):
     class Meta:
         model = UploadFiles
         fields = ['user', 'email', 'name', 'file']
+        widgets = {'user': forms.HiddenInput(), 'email': forms.HiddenInput()}
 
 
 class LoginForm(forms.ModelForm):
