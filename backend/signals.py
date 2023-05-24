@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+# from django.core.mail import EmailMultiAlternatives
 from django.dispatch import receiver, Signal
 from django_rest_passwordreset.signals import reset_password_token_created
 
@@ -36,26 +36,26 @@ def password_reset_token_created(sender, instance, reset_password_token, **kwarg
     msg.send()
 
 
-@receiver(new_user_registered)
-def new_user_registered_signal(user_id, **kwargs):
-    """
-    Отправляем письмо с подтверждением аккаунта на почту пользователя.
-    (По переходу по ссылке в письме пользователь активируется)
-    """
-    # send an e-mail to the user
-    token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user_id)
-
-    msg = EmailMultiAlternatives(
-        # title:
-        f"Password Reset Token for {token.user.email}",
-        # message:  # Ссылка для подтверждения аккаунта пользователя (https://localhost:8000  - заменить на свой домен)
-        f"http://localhost:8000/api/v1/user/register/confirm?token={token.key}&email={token.user.email}",
-        # from:
-        settings.EMAIL_HOST_USER,
-        # to:
-        [token.user.email]
-    )
-    msg.send()
+# @receiver(new_user_registered)
+# def new_user_registered_signal(user_id, **kwargs):
+#     """
+#     Отправляем письмо с подтверждением аккаунта на почту пользователя.
+#     (По переходу по ссылке в письме пользователь активируется)
+#     """
+#     # send an e-mail to the user
+#     token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user_id)
+#
+#     msg = EmailMultiAlternatives(
+#         # title:
+#         f"Password Reset Token for {token.user.email}",
+#         # message:  # Ссылка для подтверждения аккаунта пользователя (https://localhost:8000  - заменить на свой домен)
+#         f"http://localhost:8000/api/v1/user/register/confirm?token={token.key}&email={token.user.email}",
+#         # from:
+#         settings.EMAIL_HOST_USER,
+#         # to:
+#         [token.user.email]
+#     )
+#     msg.send()
 
 
 @receiver(new_order)

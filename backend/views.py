@@ -1,7 +1,7 @@
 import datetime
 from distutils.util import strtobool
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
@@ -18,12 +18,13 @@ from rest_framework.views import APIView
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
-from backend.forms import UploadFilesForm, LoginForm
+from backend.forms import UploadFilesForm, LoginForm, RegisterForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken, User
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
-from backend.signals import new_user_registered, new_order
+# from backend.signals import new_user_registered, new_order
+from backend.tasks import new_user_registered_mail_task
 
 
 class RegisterAccount(APIView):
@@ -32,11 +33,8 @@ class RegisterAccount(APIView):
     """
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
-
         # проверяем обязательные аргументы
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
-            errors = {}
-
             # проверяем пароль на сложность
             try:
                 validate_password(request.data['password'])
@@ -56,13 +54,16 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    new_user_registered.send(sender=self.__class__, user_id=user.id)
-                    return JsonResponse({'Status': True})
+                    new_user_registered_mail_task.delay(user_id=user.id)
+                    return render(request, 'backend/success.html')
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
+    def get(self, request):
+        form = RegisterForm()
+        return render(request, 'backend/register.html', {'form': form})
 
 class ConfirmAccount(APIView):
     """
@@ -148,6 +149,7 @@ class LoginAccount(APIView):
                     token, _ = Token.objects.get_or_create(user=user)
                     user.last_login = datetime.datetime.now()
                     user.save()
+                    login(request, user)  # Вот теперь сохраняется сессия (токен в браузере) !!!
                     return JsonResponse({'Status': True, 'Token': token.key})
 
             return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
@@ -163,16 +165,19 @@ class LogoutAccount(APIView):
     """
     Выход пользователя
     """
-    def post(self, request):
+    def get(self, request):
 
-        token = request.auth.pk
-        token_db = Token.objects.get(key=token)
-        if token_db:
-            logout_user_id = token_db.user_id
-            logout_user_email = User.objects.get(id=logout_user_id).email
-            token_db.delete()
+        # token = request.auth.pk
+        # token_db = Token.objects.get(key=token)
+        # if token_db:
+        #     logout_user_id = token_db.user_id
+        #     logout_user_email = User.objects.get(id=logout_user_id).email
+        #     logout(request)
+        if request.user.is_authenticated:
+            logout_user_email = request.user.email
+            logout(request)
             return JsonResponse({'Status': True, 'email': logout_user_email, 'Message': 'You are logout'})
-        return JsonResponse({'Status': False, 'Message': 'May be wrong token'})
+        return JsonResponse({'Status': False, 'Message': 'Вы уже вышли'})
 
 
 # по умолчанию только get метод, если в классе не определён ни один метод
@@ -543,7 +548,7 @@ class OrderView(APIView):
                         serializer = OrderSerializer(order, many=True)
                         order_sum = serializer.data[0]['total_sum']
                         # Отправка письма пользователю, о том что заказ оформлен и общую сумму.
-                        new_order.send(sender=self.__class__, user_id=request.user.id, order_sum=order_sum)
+                        # new_order.send(sender=self.__class__, user_id=request.user.id, order_sum=order_sum)  # Временно закоментировал
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
