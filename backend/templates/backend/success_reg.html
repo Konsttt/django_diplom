@@ -6,10 +6,9 @@
 </head>
 <body>
 <h1>Спасибо за регистрацию!</h1>
-
 <p>На вашу почту отправлено письмо. Чтобы подтвердить регистрацию, перейдите по ссылке в письме.</p>
-<a href="http://172.27.66.91:8000/api/v1/categories">Категории товаров</a>
-<a href="http://172.27.66.91:8000/api/v1/shops">Магазины</a>
-<a href="http://172.27.66.91:8000/api/v1/shops">Все товары</a>
+<p><a href="{% url 'backend:categories' %}">Категории товаров</a></p>
+<p><a href="{% url 'backend:shops' %}">Магазины</a></p>
+<p><a href="{% url 'backend:products' %}">Все товары</a></p>
 </body>
 </html>

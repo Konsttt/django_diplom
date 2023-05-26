@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Успешный вход</title>
+</head>
+<body>
+<h1>Добро пожаловать {{ first_name }} {{ last_name }}!</h1>
+
+<p><a href="{% url 'backend:categories' %}">Категории товаров</a></p>
+<p><a href="{% url 'backend:shops' %}">Магазины</a></p>
+<p><a href="{% url 'backend:products' %}">Все товары</a></p>
+<p><a href="{% url 'backend:user-logout' %}">Выход</a></p>
+</body>
+</html>

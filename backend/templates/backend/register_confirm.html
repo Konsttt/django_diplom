@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Успешная регистрация</title>
+</head>
+<body>
+<h1>{{ first_name }} {{ last_name }} Вы подтвердили регистрацию!</h1>
+<p>Вход:</p>
+<p><a href="{% url 'backend:user-login' %}">Войти</a></p>
+<p><a href="{% url 'backend:categories' %}">Категории товаров</a></p>
+<p><a href="{% url 'backend:shops' %}">Магазины</a></p>
+<p><a href="{% url 'backend:products' %}">Все товары</a></p>
+</body>
+</html>

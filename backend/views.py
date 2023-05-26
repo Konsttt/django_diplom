@@ -2,6 +2,7 @@ import datetime
 from distutils.util import strtobool
 
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
@@ -9,22 +10,23 @@ from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
 from django.shortcuts import render
+from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 
 from requests import get
 from rest_framework.authtoken.models import Token
+from django_rest_passwordreset.models import ResetPasswordToken
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
-from backend.forms import UploadFilesForm, LoginForm, RegisterForm
+from backend.forms import UploadFilesForm, LoginForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken, User
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
-# from backend.signals import new_user_registered, new_order
-from backend.tasks import new_user_registered_mail_task
+from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task
 
 
 class RegisterAccount(APIView):
@@ -55,7 +57,7 @@ class RegisterAccount(APIView):
                     user.set_password(request.data['password'])
                     user.save()
                     new_user_registered_mail_task.delay(user_id=user.id)
-                    return render(request, 'backend/success.html')
+                    return render(request, 'backend/success_reg.html')
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
@@ -64,6 +66,7 @@ class RegisterAccount(APIView):
     def get(self, request):
         form = RegisterForm()
         return render(request, 'backend/register.html', {'form': form})
+
 
 class ConfirmAccount(APIView):
     """
@@ -78,16 +81,15 @@ class ConfirmAccount(APIView):
 
         email_ = request.GET.get('email')
         token_ = request.GET.get('token')
-
-        token = ConfirmEmailToken.objects.filter(user__email=email_,
-                                                 key=token_).first()
+        token = ConfirmEmailToken.objects.filter(user__email=email_, key=token_).first()
         if token:
             token.user.is_active = True
             token.user.save()
-            auth_token = Token(user_id=token.user.id, key=token.key)
+            auth_token = Token(user_id=token.user.id)  # key=token.key - это убрал, чтобы генерировался новый токен!
             auth_token.save()
             token.delete()
-            return JsonResponse({'Status': True})
+            return render(request, 'backend/register_confirm.html',
+                          {'first_name': token.user.first_name, 'last_name': token.user.last_name})
         else:
             return JsonResponse({'Status': False, 'Errors': 'Неправильно указан токен или email'})
 
@@ -150,7 +152,8 @@ class LoginAccount(APIView):
                     user.last_login = datetime.datetime.now()
                     user.save()
                     login(request, user)  # Вот теперь сохраняется сессия (токен в браузере) !!!
-                    return JsonResponse({'Status': True, 'Token': token.key})
+                    return render(request, 'backend/success_login.html',
+                                  {'first_name': user.first_name, 'last_name': user.last_name})
 
             return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
 
@@ -175,7 +178,7 @@ class LogoutAccount(APIView):
         #     logout(request)
         if request.user.is_authenticated:
             logout_user_email = request.user.email
-            logout(request)
+            logout(request)  # Очистка сессии на клиенте (браузере) !!!
             return JsonResponse({'Status': True, 'email': logout_user_email, 'Message': 'You are logout'})
         return JsonResponse({'Status': False, 'Message': 'Вы уже вышли'})
 
@@ -590,3 +593,55 @@ class UploadFilesView(APIView):
         # В результате get-запроса отображается форма с двумя полями ввода - имя файла и загрузка файла,
         # и кнопка Загрузить.
         return render(request, 'backend/upload.html', {'form': form})
+
+
+# class ResetPassword(APIView):
+#     """
+#     Класс для сброса пароля
+#     """
+#     # Авторизация методом POST
+#     def post(self, request, *args, **kwargs):
+#         reset_password_request_token = ResetPasswordRequestToken.as_view()
+#         reset_password_request_token
+#         return JsonResponse({'Status': False, 'Errors': 'Не указан email'})
+#
+#     def get(self, request):
+#         if not request.user.is_authenticated:
+#             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+#         form = ResetPasswordForm()
+#         return render(request, 'backend/password_reset.html', {'form': form})
+
+class ResetPassword(ResetPasswordRequestToken):
+    """
+    Класс для сброса пароля
+    """
+    # Переопределение метода post родительского класса ради Celery
+    def post(self, request, *args, **kwargs):
+        status = super(ResetPassword, self).post(request)
+        if status.status_code == 200:  # родительская функция отработала хорошо (и могла бы отправить сигнал-письмо)
+            # Все проверки в родительской форме
+            email = request.data['email']
+            user = User.objects.get(email=email)
+            token = ResetPasswordToken.objects.get(user_id=user.id).key
+            password_reset_token_mail_task.delay(token, email, user.first_name, user.last_name)
+            return render(request, 'backend/success_reset_psw.html')
+        return status
+
+    # Форма для ввода почты (для любого пользователя)
+    def get(self, request):
+        form = ResetPasswordForm()
+        return render(request, 'backend/password_reset.html', {'form': form})
+
+
+class EnterNewPassword(ResetPasswordConfirm):
+
+    # Форма для ввода почты (для любого пользователя)
+    def get(self, request):
+        form = EnterNewPasswordForm(initial={'token': self.request.query_params['token']})
+        return render(request, 'backend/enter_new_password.html', {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        status = super(EnterNewPassword, self).post(request)
+        if status.status_code == 200:  # родительская функция отработала хорошо (и могла бы отправить сигнал-письмо)
+            return render(request, 'backend/success_enter_new_password.html')
+        return status

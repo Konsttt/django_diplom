@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_rest_passwordreset.tokens import get_token_generator
 
+
 STATE_CHOICES = (
     ('basket', 'Статус корзины'),
     ('new', 'Новый'),
@@ -67,7 +68,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
     objects = UserManager()
     USERNAME_FIELD = 'email'
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('Адрес электронной почты'), unique=True)
     company = models.CharField(verbose_name='Компания', max_length=40, blank=True)
     position = models.CharField(verbose_name='Должность', max_length=40, blank=True)
     username_validator = UnicodeUsernameValidator()
@@ -279,7 +280,7 @@ class ConfirmEmailToken(models.Model):
     # Key field, though it is not the primary key of the model
     key = models.CharField(
         _("Key"),
-        max_length=40,  # Было 64, но в джанговской табличке authtoken_token 40. Иногда ошибки по превышению длины были.
+        max_length=64,
         db_index=True,
         unique=True
     )

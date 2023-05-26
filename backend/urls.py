@@ -3,13 +3,13 @@ from django_rest_passwordreset.views import reset_password_request_token, reset_
 
 from backend.views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryView, ShopView, ProductInfoView, \
     BasketView, AccountDetails, ContactView, OrderView, PartnerState, PartnerOrders, ConfirmAccount, LogoutAccount, \
-    UploadFilesView
+    UploadFilesView, ResetPassword, EnterNewPassword
 
 from django.conf import settings
 from django.conf.urls.static import static
 
 
-app_name = 'backend'
+app_name = 'backend'  # !!! теперь в url в templates нужно указывать {% url 'backend:shops'%} !!!
 urlpatterns = [
     # Загрузка локального файла с товарами менеджером на сервер
     path('partner/upload_file/', UploadFilesView.as_view(), name="upload_files"),
@@ -33,15 +33,15 @@ urlpatterns = [
     # Выход пользователя - удаление токена.
     path('user/logout', LogoutAccount.as_view(), name='user-logout'),
     # Запрос на сброс пароля. На почту приходит временный токен.
-    path('user/password_reset', reset_password_request_token, name='password-reset'),
+    path('user/password_reset', ResetPassword.as_view(), name='password-reset'),  # reset_password_request_token
     # Сброс пароля (новый пароль + временный токен из почты)
-    path('user/password_reset/confirm', reset_password_confirm, name='password-reset-confirm'),
+    path('user/password_reset/confirm', EnterNewPassword.as_view(), name='password-reset-confirm'),
     # Просмотр всех категорий товаров любым пользователем
     path('categories', CategoryView.as_view(), name='categories'),
     # Просмотр всех магазинов любым пользователем
     path('shops', ShopView.as_view(), name='shops'),
     # Поиск товаров по магазину и/или категории товара
-    path('products', ProductInfoView.as_view(), name='shops'),
+    path('products', ProductInfoView.as_view(), name='products'),
     # Наполнение корзины, удаление товара из корзины, изменения кол-ва выбранных товаров в корзине
     path('basket', BasketView.as_view(), name='basket'),
     # Оформление из корзины нового заказа. Просмотр всех своих заказов.
