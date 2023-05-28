@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Выбор файла</title>
+</head>
+<body>
+{% block content %}
+  <h1>Обновление товаров в БД</h1>
+    <p> Скопируйте из ваших файлов нужный файл: </p>
+  <form method="POST">
+    {% csrf_token %}
+    {% for name in names %}
+        <li> {{ name }} </li>
+    {% endfor %}
+    <br> </br>
+      <label for="url">Вставьте ссылку: </label>
+      <input id="url" type="text" name="url">
+      <input type="submit" value="Обновить товары">
+  </form>
+{% endblock %}
+</body>
+</html>

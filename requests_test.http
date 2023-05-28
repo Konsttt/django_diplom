@@ -222,12 +222,12 @@ Authorization: Token b295f813d6a27bab77959c8183264df36dbf785d
 ###
 
 # Создание/наполнение корзины (создаётся запись в Orders и записи в промежуточной таблице OrderItems)
-POST http://localhost:8000/api/v1/basket
-Authorization: Token b295f813d6a27bab77959c8183264df36dbf785d
+POST http://192.168.69.157:8000/api/v1/basket
+Authorization: Token 0834d1dc1f6a2fd68c748bc2995efb5
 Content-Type: application/json
 
 {
-  "items": "[{\"product_info\": 5, \"quantity\": 3}, {\"product_info\": 1, \"quantity\": 3}]"
+  "items": "[{\"product_info\": 10, \"quantity\": 10}, {\"product_info\": 12, \"quantity\": 7}]"
 }
 
 ###
@@ -265,13 +265,13 @@ Authorization: Token b295f813d6a27bab77959c8183264df36dbf785d
 # Оформление заказа из корзины (в json запросе передаются id-корзины и id-адреса_доставки_пользователя, т.к. корзин и контактво может быть у пользователя несколько)
 # У заказа статус меняется на new, на почту пользователю отправляется письмо - что заказ оформлен.
 # (Небольшой нюанс: id корзины передаётся строкой, id контакта - числом.)
-POST http://localhost:8000/api/v1/order
-Authorization: Token b295f813d6a27bab77959c8183264df36dbf785d
+POST http://192.168.69.157:8000/api/v1/order
+Authorization: Token 0834d1dc1f6a2fd68c748bc2995efb5
 Content-Type: application/json
 
 {
-  "id": "2",
-  "contact": 16
+  "id": "1",
+  "contact": 1
 }
 
 ###

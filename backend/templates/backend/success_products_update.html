@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Успешное обновление товаров магазина в БД</title>
+</head>
+<body>
+<h1>Товары в БД успешно обновлены</h1>
+
+<p><a href="{% url 'backend:categories' %}">Категории товаров</a></p>
+<p><a href="{% url 'backend:shops' %}">Магазины</a></p>
+<p><a href="{% url 'backend:products' %}">Все товары</a></p>
+<br>
+<p><a href="{% url 'backend:upload_files' %}">Загрузить yaml-файл с товарами</a></p>
+<p><a href="{% url 'backend:partner-state' %}">Мои магазины</a></p>
+<p><a href="{% url 'backend:user-details' %}">Изменить свои учетные данные</a></p>
+<p><a href="{% url 'backend:user-logout' %}">Выход</a></p>
+</body>
+</html>

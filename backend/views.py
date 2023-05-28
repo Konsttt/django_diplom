@@ -2,7 +2,6 @@ import datetime
 from distutils.util import strtobool
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
@@ -23,10 +22,10 @@ from yaml import load as load_yaml, Loader
 
 from backend.forms import UploadFilesForm, LoginForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
-    Contact, ConfirmEmailToken, User
+    Contact, ConfirmEmailToken, User, UploadFiles
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
-from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task
+from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task, host, new_order_mail_task
 
 
 class RegisterAccount(APIView):
@@ -250,6 +249,7 @@ class BasketView(APIView):
     # Создать корзину (добавить в корзину товары)
     # Перед добавлением в корзину первого товара - создаётся корзина пользователя - одна запись в таблице Order (basket)
     # А так же в OrderItem - запись с выбранным товаром, id-корзины из Order(куда его положили), и кол-во товаров
+    # Параметры запроса: product_info - id из таблицы productinfo и quantity - кол-во товаров
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -329,6 +329,25 @@ class PartnerUpdate(APIView):
     """
     Класс для обновления прайса от поставщика
     """
+
+    # Форма c выпадающим списком всех загруженных файлов менеджера магазина.
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+
+        # ! Проверка, что аутентифицированный пользователь - менеджер магазина
+        if request.user.type != 'shop':
+            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+
+        files = UploadFiles.objects.filter(user_id=request.user.id)
+
+        url = f'http://{host}:8000/api/v1/media/'
+        names = [url+str(file.file) for file in files]
+
+        return render(request, 'backend/choice_file.html', {'names': names})
+
+
+
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -371,7 +390,7 @@ class PartnerUpdate(APIView):
                                                         parameter_id=parameter_object.id,
                                                         value=value)
 
-                return JsonResponse({'Status': True})
+                return render(request, 'backend/success_products_update.html')
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -389,9 +408,12 @@ class PartnerState(APIView):
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
 
-        shop = request.user.shop
-        serializer = ShopSerializer(shop)
-        return Response(serializer.data)
+        shops = Shop.objects.filter(user_id=request.user.id)
+        shops_dict = {}
+        for shop in shops:
+            shops_dict[shop.name] = shop.state
+        return JsonResponse(shops_dict)
+
 
     # изменить текущий статус
     def post(self, request, *args, **kwargs):
@@ -510,7 +532,7 @@ class OrderView(APIView):
     Класс для получения и размещения заказов пользователями
     """
 
-    # получить мои заказы
+    # просмотр всех своих заказов (оформленных, не корзины)
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -550,9 +572,9 @@ class OrderView(APIView):
                                 F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
                         serializer = OrderSerializer(order, many=True)
                         order_sum = serializer.data[0]['total_sum']
-                        # Отправка письма пользователю, о том что заказ оформлен и общую сумму.
-                        # new_order.send(sender=self.__class__, user_id=request.user.id, order_sum=order_sum)  # Временно закоментировал
-                        return JsonResponse({'Status': True})
+                        # Отправка письма о новом заказе с помощью Celery
+                        new_order_mail_task.delay(request.user.id, order_sum, request.data['id'])
+                        return render(request, 'backend/success_new_order.html', {'id': request.data['id'], 'order_sum': order_sum})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -579,7 +601,7 @@ class UploadFilesView(APIView):
         form = UploadFilesForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return JsonResponse({'Status': True, 'Message': f'File is safe in database'}, status=200)
+        return render(request, 'backend/success_upload_file.html')
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -595,22 +617,6 @@ class UploadFilesView(APIView):
         return render(request, 'backend/upload.html', {'form': form})
 
 
-# class ResetPassword(APIView):
-#     """
-#     Класс для сброса пароля
-#     """
-#     # Авторизация методом POST
-#     def post(self, request, *args, **kwargs):
-#         reset_password_request_token = ResetPasswordRequestToken.as_view()
-#         reset_password_request_token
-#         return JsonResponse({'Status': False, 'Errors': 'Не указан email'})
-#
-#     def get(self, request):
-#         if not request.user.is_authenticated:
-#             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-#         form = ResetPasswordForm()
-#         return render(request, 'backend/password_reset.html', {'form': form})
-
 class ResetPassword(ResetPasswordRequestToken):
     """
     Класс для сброса пароля
@@ -618,11 +624,12 @@ class ResetPassword(ResetPasswordRequestToken):
     # Переопределение метода post родительского класса ради Celery
     def post(self, request, *args, **kwargs):
         status = super(ResetPassword, self).post(request)
-        if status.status_code == 200:  # родительская функция отработала хорошо (и могла бы отправить сигнал-письмо)
-            # Все проверки в родительской форме
+        if status.status_code == 200:  # Родительская функция отработала хорошо (и могла бы отправить сигнал-письмо)
+            # Все проверки прошли в родительской форме.
             email = request.data['email']
             user = User.objects.get(email=email)
             token = ResetPasswordToken.objects.get(user_id=user.id).key
+            # Отправка письма с данными для сброса пароля с помощью функционала Celery
             password_reset_token_mail_task.delay(token, email, user.first_name, user.last_name)
             return render(request, 'backend/success_reset_psw.html')
         return status

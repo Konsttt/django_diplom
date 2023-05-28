@@ -1,0 +1,46 @@
+shop: Ozon
+categories:
+  - id: 224
+    name: Смартфоны
+  - id: 15
+    name: Аксессуары
+  - id: 1
+    name: Flash-накопители
+
+goods:
+  - id: 111222333
+    category: 224
+    model: xiaomi/redmi/13 pro
+    name: Смартфон Redmi Xiaomi 13 Pro 8/128 ГБ, черный матовый
+    price: 60000
+    price_rrc: 63000
+    quantity: 14
+    parameters:
+      "Диагональ (дюйм)": 6.73
+      "Разрешение (пикс)": 3200x1440
+      "Встроенная память (Гб)": 128
+      "Цвет": черный матовый
+  - id: 111222444
+    category: 224
+    model: xiaomi/redmi/13 pro
+    name: Смартфон Redmi Xiaomi 13 Pro 8/256 ГБ, салатовый
+    price: 70000
+    price_rrc: 74000
+    quantity: 9
+    parameters:
+      "Диагональ (дюйм)": 6.73
+      "Разрешение (пикс)": 3200x1440
+      "Встроенная память (Гб)": 256
+      "Цвет": салатовый
+  - id: 111222555
+    category: 224
+    model: xiaomi/redmi/13 pro
+    name: Смартфон Redmi Xiaomi 13 Pro 8/512 ГБ, синий
+    price: 80000
+    price_rrc: 785000
+    quantity: 10
+    parameters:
+      "Диагональ (дюйм)": 6.73
+      "Разрешение (пикс)": 3200x1440
+      "Встроенная память (Гб)": 512
+      "Цвет": синий

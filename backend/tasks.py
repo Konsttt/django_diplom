@@ -1,6 +1,7 @@
 # backend/tasks.py
 from time import sleep
 from django.core.mail import EmailMultiAlternatives
+
 from backend.models import ConfirmEmailToken
 from django.conf import settings
 from celery import shared_task
@@ -56,7 +57,7 @@ def password_reset_token_mail_task(token, email, first_name, last_name):
 
 
 @shared_task()
-def new_order_mail_task(user_id, order_sum, **kwargs):
+def new_order_mail_task(user_id, order_sum, order_id, **kwargs):
     """
     отправяем письмо при изменении статуса заказа
     """
@@ -67,7 +68,7 @@ def new_order_mail_task(user_id, order_sum, **kwargs):
         # title:
         f"Обновление статуса заказа",
         # message:
-        f'Заказ на сумму {order_sum} сформирован',
+        f'Заказ на сумму {order_sum} сформирован. Номер вашего заказа №{order_id}.',
         # from:
         settings.EMAIL_HOST_USER,
         # to:

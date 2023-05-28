@@ -31,8 +31,5 @@ class ResetPasswordForm(forms.ModelForm):
 
 
 class EnterNewPasswordForm(forms.Form):
-
     token = forms.CharField(min_length=10, max_length=40, widget=forms.HiddenInput())
     password = forms.CharField(min_length=8)
-
-
