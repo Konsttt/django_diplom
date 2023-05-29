@@ -140,12 +140,12 @@ AUTH_USER_MODEL = 'backend.User'  # https://django.fun/ru/articles/tutorials/dja
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_USE_TLS = True
-EMAIL_HOST = 'mail.tips-tricks.ru'
-EMAIL_HOST_USER = 'dev_admin@tips-tricks.ru'
-EMAIL_HOST_PASSWORD = '111111+'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = '465'
 EMAIL_USE_SSL = True
-SERVER_EMAIL = 'tips-tricks.ru'
+SERVER_EMAIL = os.getenv('SERVER_EMAIL')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -164,7 +164,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',  # комментировал - работало
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
 
     ),

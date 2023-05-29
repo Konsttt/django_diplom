@@ -1,13 +1,15 @@
 from django.urls import path
-from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
+from rest_framework.routers import DefaultRouter
 
 from backend.views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryView, ShopView, ProductInfoView, \
-    BasketView, AccountDetails, ContactView, OrderView, PartnerState, PartnerOrders, ConfirmAccount, LogoutAccount, \
-    UploadFilesView, ResetPassword, EnterNewPassword
+    BasketView, AccountDetails, OrderView, PartnerState, PartnerOrders, ConfirmAccount, LogoutAccount, \
+    UploadFilesView, ResetPassword, EnterNewPassword, ContactViewSet
 
 from django.conf import settings
 from django.conf.urls.static import static
 
+r = DefaultRouter()
+r.register('user/contact', ContactViewSet)
 
 app_name = 'backend'  # !!! теперь в url в templates нужно указывать {% url 'backend:shops'%} !!!
 urlpatterns = [
@@ -26,8 +28,8 @@ urlpatterns = [
     path('user/register/confirm', ConfirmAccount.as_view(), name='user-register-confirm'),
     # Просмотр и редактирование своих данных пользователем
     path('user/details', AccountDetails.as_view(), name='user-details'),
-    # CRUD своих адресов
-    path('user/contact', ContactView.as_view(), name='user-contact'),
+    # # CRUD своих адресов
+    # path('user/contact', ContactView.as_view(), name='user-contact'),
     # Вход по логину и паролю активированного пользователя, создаётся токен, если его нет.
     path('user/login', LoginAccount.as_view(), name='user-login'),
     # Выход пользователя - удаление токена.
@@ -48,4 +50,4 @@ urlpatterns = [
     path('order', OrderView.as_view(), name='order'),
     # Файлы .yaml с товарами магазинов загружаются и хранятся в папке /media/files/
     # В БД в таблице uploadfiles хранится владелец файла, путь к файлу, название файла
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + r.urls + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

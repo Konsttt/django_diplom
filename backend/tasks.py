@@ -39,7 +39,7 @@ def new_user_registered_mail_task(user_id, **kwargs):
 def password_reset_token_mail_task(token, email, first_name, last_name):
     """
     Отправляем письмо с токеном для сброса пароля
-    When a token is created, an e-mail needs to be sent to the user
+    (По переходу по ссылке в письме пользователь попадает на страничку ввода нового пароля)
     """
     # send an e-mail to the user
 
@@ -60,6 +60,7 @@ def password_reset_token_mail_task(token, email, first_name, last_name):
 def new_order_mail_task(user_id, order_sum, order_id, **kwargs):
     """
     отправяем письмо при изменении статуса заказа
+    (На почту приходит подтверждение оформленного заказа с номером заказа и общей суммой.)
     """
     # send an e-mail to the user
     user = User.objects.get(id=user_id)

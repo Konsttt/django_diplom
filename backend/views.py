@@ -4,25 +4,30 @@ from distutils.util import strtobool
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.serializers import serialize
 from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 
 from requests import get
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
+from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
 from backend.forms import UploadFilesForm, LoginForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken, User, UploadFiles
+from backend.permissions import IsOwnerAdminOrReadOnly
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
 from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task, host, new_order_mail_task
@@ -153,8 +158,7 @@ class LoginAccount(APIView):
                     login(request, user)  # Вот теперь сохраняется сессия (токен в браузере) !!!
                     return render(request, 'backend/success_login.html',
                                   {'first_name': user.first_name, 'last_name': user.last_name})
-
-            return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
+            return JsonResponse({'Status': False, 'Errors': 'Wrong password'})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -454,77 +458,17 @@ class PartnerOrders(APIView):
         return Response(serializer.data)
 
 
-class ContactView(APIView):
-    """
-    Класс для работы с контактами покупателей
-    """
+class ContactViewSet(ModelViewSet):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+    permission_classes = [IsAuthenticated, IsOwnerAdminOrReadOnly]
 
-    # получить мои контакты
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-        contact = Contact.objects.filter(
-            user_id=request.user.id)
-        serializer = ContactSerializer(contact, many=True)
-        return Response(serializer.data)
-
-    # добавить новый контакт
-    def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-
-        if {'city', 'street', 'phone'}.issubset(request.data):
-            # request.data._mutable = True
-            request.data.update({'user': request.user.id})
-            serializer = ContactSerializer(data=request.data)
-
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({'Status': True})
-            else:
-                return JsonResponse({'Status': False, 'Errors': serializer.errors})
-
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
-
-    # удалить контакт
-    def delete(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-
-        items_sting = request.data.get('items')
-        if items_sting:
-            items_list = items_sting.split(',')
-            items_list_digit = [int(x.strip()) for x in items_list]
-            query = Q()
-            objects_deleted = False
-            for contact_id in items_list_digit:
-                query = query | Q(user_id=request.user.id, id=contact_id)
-                objects_deleted = True
-
-            if objects_deleted:
-                deleted_count = Contact.objects.filter(query).delete()[0]
-                return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
-
-    # редактировать контакт
-    def patch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-
-        if 'id' in request.data:
-            if request.data['id'].isdigit():
-                contact = Contact.objects.filter(id=request.data['id'], user_id=request.user.id).first()
-                print(contact)
-                if contact:
-                    serializer = ContactSerializer(contact, data=request.data, partial=True)
-                    if serializer.is_valid():
-                        serializer.save()
-                        return JsonResponse({'Status': True})
-                    else:
-                        return JsonResponse({'Status': False, 'Errors': serializer.errors})
-            else:
-                return JsonResponse({'Status': False, 'Error': 'id должен передаваться строкой из цифр'})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+    # Переопределение метода, для того чтобы пользователи видели только свои контакты, а админ все.
+    def get_queryset(self):
+        queryset = Contact.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user_id=self.request.user.id)
+        return queryset
 
 
 class OrderView(APIView):
