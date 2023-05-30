@@ -27,9 +27,9 @@ from yaml import load as load_yaml, Loader
 from backend.forms import UploadFilesForm, LoginForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken, User, UploadFiles
-from backend.permissions import IsOwnerAdminOrReadOnly
+from backend.permissions import IsOwnerAdminOrReadOnly, IsOwnerOrAdmin
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
-    OrderItemSerializer, OrderSerializer, ContactSerializer
+    OrderItemSerializer, OrderSerializer, ContactSerializer, ProductSerializer
 from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task, host, new_order_mail_task
 
 
@@ -37,6 +37,7 @@ class RegisterAccount(APIView):
     """
     Для регистрации покупателей
     """
+
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
         # проверяем обязательные аргументы
@@ -80,6 +81,7 @@ class ConfirmAccount(APIView):
     По запросу post из таблицы confirmmailtoken - токен удаляется, а в таблицу authtoken_token - токен записывается,
     и пользователь активируется. Теперь при авторизации(login) будет использоваться токен из authtoken_token.)
     """
+
     # Подтверждение методом get с параметрами - по клику по ссылке в письме.
     def get(self, request):
 
@@ -144,6 +146,7 @@ class LoginAccount(APIView):
     """
     Класс для авторизации пользователей
     """
+
     # Авторизация методом POST
     def post(self, request, *args, **kwargs):
 
@@ -171,8 +174,8 @@ class LogoutAccount(APIView):
     """
     Выход пользователя
     """
-    def get(self, request):
 
+    def get(self, request):
         # token = request.auth.pk
         # token_db = Token.objects.get(key=token)
         # if token_db:
@@ -183,7 +186,7 @@ class LogoutAccount(APIView):
             logout_user_email = request.user.email
             logout(request)  # Очистка сессии на клиенте (браузере) !!!
             return JsonResponse({'Status': True, 'email': logout_user_email, 'Message': 'You are logout'})
-        return JsonResponse({'Status': False, 'Message': 'Вы уже вышли'})
+        return JsonResponse({'Status': False, 'Message': 'Your are already logout'})
 
 
 # по умолчанию только get метод, если в классе не определён ни один метод
@@ -193,6 +196,22 @@ class CategoryView(ListAPIView):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+
+class PartnerCategorySet(ModelViewSet):
+    """
+    Класс для редактирования своих категорий менеджерами
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated, IsOwnerAdminOrReadOnly]
+
+    # Переопределение метода, чтобы менеджер магазина видел только свои магазины, а админ все.
+    def get_queryset(self):
+        queryset = Category.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user_id=self.request.user.id)
+        return queryset
 
 
 # по умолчанию только get метод
@@ -208,6 +227,7 @@ class ProductInfoView(APIView):
     """
     Класс для поиска товаров по магазину и/или категории товаров
     """
+
     def get(self, request, *args, **kwargs):
 
         query = Q(shop__state=True)
@@ -229,6 +249,24 @@ class ProductInfoView(APIView):
         serializer = ProductInfoSerializer(queryset, many=True)
 
         return Response(serializer.data)
+
+
+class PartnerProductSet(ModelViewSet):
+    """
+    Класс для редактирования своих продуктов менеджерами
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    # Т.к. запись связанная, то только редактирование. Запрет методов post и patch.
+    http_method_names = ['get', 'put', 'head', 'delete']
+
+    # Переопределение метода, чтобы менеджер магазина видел только свои продукты, а админ все.
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(product_infos__shop__user=self.request.user.id)
+        return queryset
 
 
 class BasketView(APIView):
@@ -346,11 +384,9 @@ class PartnerUpdate(APIView):
         files = UploadFiles.objects.filter(user_id=request.user.id)
 
         url = f'http://{host}:8000/api/v1/media/'
-        names = [url+str(file.file) for file in files]
+        names = [url + str(file.file) for file in files]
 
         return render(request, 'backend/choice_file.html', {'names': names})
-
-
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -399,48 +435,24 @@ class PartnerUpdate(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
-class PartnerState(APIView):
-    """
-    Класс для работы со статусом поставщика
-    """
+class PartnerShopSet(ModelViewSet):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
+    permission_classes = [IsAuthenticated, IsOwnerAdminOrReadOnly]
 
-    # получить текущий статус
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-
-        if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
-
-        shops = Shop.objects.filter(user_id=request.user.id)
-        shops_dict = {}
-        for shop in shops:
-            shops_dict[shop.name] = shop.state
-        return JsonResponse(shops_dict)
-
-
-    # изменить текущий статус
-    def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
-
-        if request.user.type != 'shop':
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
-        state = request.data.get('state')
-        if state:
-            try:
-                Shop.objects.filter(user_id=request.user.id).update(state=strtobool(state))
-                return JsonResponse({'Status': True})
-            except ValueError as error:
-                return JsonResponse({'Status': False, 'Errors': str(error)})
-
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+    # Переопределение метода, чтобы менеджер магазина видел только свои магазины, а админ все.
+    def get_queryset(self):
+        queryset = Shop.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(user_id=self.request.user.id)
+        return queryset
 
 
 class PartnerOrders(APIView):
     """
     Класс для получения заказов поставщиками
     """
+
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -463,10 +475,10 @@ class ContactViewSet(ModelViewSet):
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated, IsOwnerAdminOrReadOnly]
 
-    # Переопределение метода, для того чтобы пользователи видели только свои контакты, а админ все.
+    # Переопределение метода, чтобы пользователи видели только свои контакты, а админ и менеджеры магазина все.
     def get_queryset(self):
         queryset = Contact.objects.all()
-        if not self.request.user.is_staff:
+        if not (self.request.user.is_staff or self.request.user.type == 'shop'):
             queryset = queryset.filter(user_id=self.request.user.id)
         return queryset
 
@@ -518,7 +530,8 @@ class OrderView(APIView):
                         order_sum = serializer.data[0]['total_sum']
                         # Отправка письма о новом заказе с помощью Celery
                         new_order_mail_task.delay(request.user.id, order_sum, request.data['id'])
-                        return render(request, 'backend/success_new_order.html', {'id': request.data['id'], 'order_sum': order_sum})
+                        return render(request, 'backend/success_new_order.html',
+                                      {'id': request.data['id'], 'order_sum': order_sum})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -565,6 +578,7 @@ class ResetPassword(ResetPasswordRequestToken):
     """
     Класс для сброса пароля
     """
+
     # Переопределение метода post родительского класса ради Celery
     def post(self, request, *args, **kwargs):
         status = super(ResetPassword, self).post(request)

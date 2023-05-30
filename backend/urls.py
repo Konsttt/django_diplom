@@ -2,14 +2,25 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from backend.views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryView, ShopView, ProductInfoView, \
-    BasketView, AccountDetails, OrderView, PartnerState, PartnerOrders, ConfirmAccount, LogoutAccount, \
-    UploadFilesView, ResetPassword, EnterNewPassword, ContactViewSet
+    BasketView, AccountDetails, OrderView, PartnerOrders, ConfirmAccount, LogoutAccount, \
+    UploadFilesView, ResetPassword, EnterNewPassword, ContactViewSet, PartnerShopSet, PartnerCategorySet, \
+    PartnerProductSet
 
 from django.conf import settings
 from django.conf.urls.static import static
 
 r = DefaultRouter()
-r.register('user/contact', ContactViewSet)
+# Просмотр и редактирование пользователями своих контактов, пользователи видят только свои контакты,
+# у менеджеров только просмотр всех контактов, без возможности редактирования, у админа все права
+r.register('user/contact', ContactViewSet, basename='user-contact')  # Для ссылок user-contact-list
+# У менеджеров просмотр и редактирование только своих магазинов, у админа все права
+# У пользователей и анонимов только просмотр всех магазинов по url 'shops' см. ниже
+r.register('partner/shop', PartnerShopSet, basename='partner-shop')
+# Редактирование менеджерами названий своих товаров, админ редактирует все товары.
+# Методы post и patch - для всех запрещены, т.к. есть связанные сущности по id,
+# (post: товары штатно добавляются из файла по url partner/update), разрешены только get, put и delete.
+# У пользователей и анонимов здесь запрет на всё. Пользователи и анонимы смотрят товары по адресу - /products)
+r.register('partner/product', PartnerProductSet, basename='partner-product-info')
 
 app_name = 'backend'  # !!! теперь в url в templates нужно указывать {% url 'backend:shops'%} !!!
 urlpatterns = [
@@ -17,8 +28,6 @@ urlpatterns = [
     path('partner/upload_file/', UploadFilesView.as_view(), name="upload_files"),
     # Загрузка товаров/магазинов в БД данных из файла
     path('partner/update', PartnerUpdate.as_view(), name='partner-update'),
-    # Просмотр/изменение_статуса своих магазинов менеджером
-    path('partner/state', PartnerState.as_view(), name='partner-state'),
     # Просмотр оформленных заказов поставщиками, каждый видит заказанные товары только из своего магазина
     path('partner/orders', PartnerOrders.as_view(), name='partner-orders'),
     # Первоначальная регистрация
@@ -28,8 +37,6 @@ urlpatterns = [
     path('user/register/confirm', ConfirmAccount.as_view(), name='user-register-confirm'),
     # Просмотр и редактирование своих данных пользователем
     path('user/details', AccountDetails.as_view(), name='user-details'),
-    # # CRUD своих адресов
-    # path('user/contact', ContactView.as_view(), name='user-contact'),
     # Вход по логину и паролю активированного пользователя, создаётся токен, если его нет.
     path('user/login', LoginAccount.as_view(), name='user-login'),
     # Выход пользователя - удаление токена.
