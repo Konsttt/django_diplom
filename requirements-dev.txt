@@ -1,0 +1,14 @@
+pytest
+pytest-cov
+pytest-django
+model_bakery
+
+django
+djangorestframework
+django-rest-passwordreset
+psycopg2-binary
+pyyaml
+ujson
+requests
+python-dotenv
+celery

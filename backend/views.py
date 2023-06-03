@@ -1,23 +1,20 @@
 import datetime
-from distutils.util import strtobool
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.core.serializers import serialize
 from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 
 from requests import get
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
-from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet

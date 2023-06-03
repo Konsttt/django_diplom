@@ -1,0 +1,753 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2023-05-24T18:39:48.559Z",
+    "user": 9,
+    "content_type": 4,
+    "object_id": "8",
+    "object_repr": "Manager1 Managerovich1",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0422\\u0438\\u043f \\u043f\\u043e\\u043b\\u044c\\u0437\\u043e\\u0432\\u0430\\u0442\\u0435\\u043b\\u044f\"]}}]"
+  }
+},
+{
+  "model": "auth.group",
+  "pk": 1,
+  "fields": {
+    "name": "testuser",
+    "permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "29zrwaq5xm5o55368zku53gurgaj13w3",
+  "fields": {
+    "session_data": ".eJxVjMEOwiAQRP-FsyEsLQgevfsNZGEXqRpISnsy_rtt0oMeZ96beYuA61LC2nkOE4mL0EacfsuI6cl1J_TAem8ytbrMU5S7Ig_a5a0Rv66H-3dQsJdtPaBNg6aRrFEweq-tQWZPkIFd9j45bZSHTPGsYgKdtmAHBOecJaNIfL74cTd_:1q2fUL:IWLd2e0etoIewMPgyXTUQwTRqHXoFHmwCUfT54KC3V4",
+    "expire_date": "2023-06-09T22:00:45.745Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "49ebud02t349c7ykr38lgyy9xirta4iv",
+  "fields": {
+    "session_data": ".eJxVjMEOwiAQRP-FsyFlAQsevfsNZGFZqRqalPZk_Hdp0oMeZ968eYuA21rC1vISJhIX4cTpt4uYnrnugB5Y77NMc12XKcp9Ig_a5G2m_Loe27-Dgq10O6boMhnO1pBmVpYHAMzmrJW23vmRAJQGitwzkPE89mJIEQG5y-LzBfjnOFI:1q2yQX:8-hFFAPzX2I4c-r7hNMaMPgB7nWZQbFhSsSza5sQEJ4",
+    "expire_date": "2023-06-10T18:14:05.475Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "mg98fqwtarfqsqq7w2bp71xka4wbqcej",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQAP_C2ZAFKSwevfsGsiwgVUOT0p6MfzckPeh1ZjJvEWjfath7XsOcxEV4cfplkfiZ2xDpQe2-SF7ats5RjkQetsvbkvLrerR_g0q9jq0rbFlrAAtgone2ZIoG0Smw09kX4BIVo2LrktGIlJFATU75Eimh-HwBzk83gQ:1q3jYg:-hN0riIm98qUVe4XbOo1DF-rtXPV6Rb2n4ojyDkz1tQ",
+    "expire_date": "2023-06-12T20:33:38.457Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "o3zg4uoerdc0z6v768v0hzgl8sgca6hw",
+  "fields": {
+    "session_data": ".eJxVjMEOwiAQRP-FsyFlAQsevfsNZGFZqRqalPZk_Hdp0oMeZ968eYuA21rC1vISJhIX4cTpt4uYnrnugB5Y77NMc12XKcp9Ig_a5G2m_Loe27-Dgq10O6boMhnO1pBmVpYHAMzmrJW23vmRAJQGitwzkPE89mJIEQG5y-LzBfjnOFI:1q3HXJ:BCiWHLKOP20KFl-2PoGOG4fONj0k5-J2YdTsf6KEffM",
+    "expire_date": "2023-06-11T14:38:21.049Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "0834d1dc1f6a2fd68c748bc2995efb5",
+  "fields": {
+    "user": 6,
+    "created": "2023-05-24T14:44:01.651Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "3417e643ca9f6052708e4bace1cfa58a10601540",
+  "fields": {
+    "user": 26,
+    "created": "2023-05-30T09:04:16.867Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "4ed09342ac5bf5aee6d58c1369204fe77",
+  "fields": {
+    "user": 8,
+    "created": "2023-05-24T18:33:53.693Z"
+  }
+},
+{
+  "model": "authtoken.token",
+  "pk": "a6229242707797b554268dfc121082a47b2b75f3",
+  "fields": {
+    "user": 25,
+    "created": "2023-05-26T22:00:45.719Z"
+  }
+},
+{
+  "model": "backend.user",
+  "pk": 6,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$6wXIV4DoWFmvDcYG4W2mfX$axs/54aQLdHZOK86X4MQT+TQxHqa0Ufh3JDJIkB71OU=",
+    "last_login": "2023-05-30T13:14:44.718Z",
+    "is_superuser": false,
+    "first_name": "User1",
+    "last_name": "Userovich1",
+    "is_staff": false,
+    "date_joined": "2023-05-24T14:43:19.837Z",
+    "email": "user1@tips-tricks.ru",
+    "company": "spacex",
+    "position": "python backend",
+    "username": "",
+    "is_active": true,
+    "type": "buyer",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "backend.user",
+  "pk": 8,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$3TKzb9FPNBNnAxBfbqphNy$pyRyTp6Ze+MTE0907QntCpgTTJjQY++i7ge32fG5Qzk=",
+    "last_login": "2023-05-30T14:50:03.935Z",
+    "is_superuser": false,
+    "first_name": "Manager1",
+    "last_name": "Managerovich1",
+    "is_staff": false,
+    "date_joined": "2023-05-24T18:33:11Z",
+    "email": "manager1@tips-tricks.ru",
+    "company": "Ozon",
+    "position": "manager",
+    "username": "",
+    "is_active": true,
+    "type": "shop",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "backend.user",
+  "pk": 9,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$16k2A7ZqkH9S5KpzDbU0vK$dyXPSFv+lP/2qihmd7XCt4jE+PKDGy6lm2OQYuuWROk=",
+    "last_login": "2023-05-30T20:02:11.268Z",
+    "is_superuser": true,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "date_joined": "2023-05-24T18:36:41.715Z",
+    "email": "dev_admin@tips-tricks.ru",
+    "company": "",
+    "position": "",
+    "username": "",
+    "is_active": true,
+    "type": "buyer",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "backend.user",
+  "pk": 25,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$ruNe8kAU9nsFNglbVFHozC$cFIIXDIAEE8g2iv8xO7Pp32Qzq0B0VFikXGVjagglVo=",
+    "last_login": "2023-05-30T14:32:48.930Z",
+    "is_superuser": false,
+    "first_name": "User2",
+    "last_name": "Userovich2",
+    "is_staff": false,
+    "date_joined": "2023-05-26T13:23:42.596Z",
+    "email": "user2@tips-tricks.ru",
+    "company": "spacey",
+    "position": "",
+    "username": "",
+    "is_active": true,
+    "type": "buyer",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "backend.user",
+  "pk": 26,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$ABcA6ymcjreRlsFQA8Khv4$JafJvZ0zYknLvTkL5QAO9U3TkEJfxGdbDzw7nka6puo=",
+    "last_login": "2023-05-30T09:04:27.701Z",
+    "is_superuser": false,
+    "first_name": "Manager2",
+    "last_name": "Managerovich2",
+    "is_staff": false,
+    "date_joined": "2023-05-30T09:03:34.839Z",
+    "email": "manager2@tips-tricks.ru",
+    "company": "Tele2",
+    "position": "manager",
+    "username": "",
+    "is_active": true,
+    "type": "shop",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "backend.shop",
+  "pk": 1,
+  "fields": {
+    "name": "Ozon",
+    "url": null,
+    "user": 8,
+    "state": true
+  }
+},
+{
+  "model": "backend.shop",
+  "pk": 2,
+  "fields": {
+    "name": "Tele2",
+    "url": null,
+    "user": 26,
+    "state": true
+  }
+},
+{
+  "model": "backend.category",
+  "pk": 1,
+  "fields": {
+    "name": "Flash-накопители",
+    "shops": [
+      2,
+      1
+    ]
+  }
+},
+{
+  "model": "backend.category",
+  "pk": 15,
+  "fields": {
+    "name": "Аксессуары",
+    "shops": [
+      2,
+      1
+    ]
+  }
+},
+{
+  "model": "backend.category",
+  "pk": 224,
+  "fields": {
+    "name": "Смартфоны",
+    "shops": [
+      2,
+      1
+    ]
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 1,
+  "fields": {
+    "name": "Смартфон Redmi Xiaomi 13 Pro 8/128 ГБ, черный космос матовый",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 2,
+  "fields": {
+    "name": "Смартфон Redmi Xiaomi 13 Pro 8/256 ГБ, изумрудный",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 4,
+  "fields": {
+    "name": "Смартфон Apple iPhone XS Max 512GB (золотистый)",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 5,
+  "fields": {
+    "name": "Смартфон Apple iPhone XR 256GB (красный)",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 6,
+  "fields": {
+    "name": "Смартфон Apple iPhone XR 256GB (черный)",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 7,
+  "fields": {
+    "name": "Смартфон Apple iPhone XR 128GB (синий)",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 8,
+  "fields": {
+    "name": "Samsung",
+    "category": 224
+  }
+},
+{
+  "model": "backend.product",
+  "pk": 9,
+  "fields": {
+    "name": "Samsung Galaxy S22",
+    "category": 224
+  }
+},
+{
+  "model": "backend.productinfo",
+  "pk": 10,
+  "fields": {
+    "model": "xiaomi/redmi/13 pro",
+    "external_id": 111222333,
+    "product": 1,
+    "shop": 1,
+    "quantity": 14,
+    "price": 60000,
+    "price_rrc": 63000
+  }
+},
+{
+  "model": "backend.productinfo",
+  "pk": 11,
+  "fields": {
+    "model": "xiaomi/redmi/13 pro",
+    "external_id": 111222444,
+    "product": 2,
+    "shop": 1,
+    "quantity": 9,
+    "price": 70000,
+    "price_rrc": 74000
+  }
+},
+{
+  "model": "backend.productinfo",
+  "pk": 37,
+  "fields": {
+    "model": "apple/iphone/xs-max",
+    "external_id": 4216292,
+    "product": 4,
+    "shop": 2,
+    "quantity": 14,
+    "price": 110000,
+    "price_rrc": 116990
+  }
+},
+{
+  "model": "backend.productinfo",
+  "pk": 38,
+  "fields": {
+    "model": "apple/iphone/xr",
+    "external_id": 4216313,
+    "product": 5,
+    "shop": 2,
+    "quantity": 9,
+    "price": 65000,
+    "price_rrc": 69990
+  }
+},
+{
+  "model": "backend.productinfo",
+  "pk": 39,
+  "fields": {
+    "model": "apple/iphone/xr",
+    "external_id": 4216226,
+    "product": 6,
+    "shop": 2,
+    "quantity": 5,
+    "price": 65000,
+    "price_rrc": 69990
+  }
+},
+{
+  "model": "backend.productinfo",
+  "pk": 40,
+  "fields": {
+    "model": "apple/iphone/xr",
+    "external_id": 4672670,
+    "product": 7,
+    "shop": 2,
+    "quantity": 7,
+    "price": 60000,
+    "price_rrc": 64990
+  }
+},
+{
+  "model": "backend.parameter",
+  "pk": 1,
+  "fields": {
+    "name": "Диагональ (дюйм)"
+  }
+},
+{
+  "model": "backend.parameter",
+  "pk": 2,
+  "fields": {
+    "name": "Разрешение (пикс)"
+  }
+},
+{
+  "model": "backend.parameter",
+  "pk": 3,
+  "fields": {
+    "name": "Встроенная память (Гб)"
+  }
+},
+{
+  "model": "backend.parameter",
+  "pk": 4,
+  "fields": {
+    "name": "Цвет"
+  }
+},
+{
+  "model": "backend.parameter",
+  "pk": 5,
+  "fields": {
+    "name": "shop"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 37,
+  "fields": {
+    "product_info": 10,
+    "parameter": 1,
+    "value": "6.73"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 38,
+  "fields": {
+    "product_info": 10,
+    "parameter": 2,
+    "value": "3200x1440"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 39,
+  "fields": {
+    "product_info": 10,
+    "parameter": 3,
+    "value": "128"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 40,
+  "fields": {
+    "product_info": 10,
+    "parameter": 4,
+    "value": "черный матовый"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 41,
+  "fields": {
+    "product_info": 11,
+    "parameter": 1,
+    "value": "6.73"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 42,
+  "fields": {
+    "product_info": 11,
+    "parameter": 2,
+    "value": "3200x1440"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 43,
+  "fields": {
+    "product_info": 11,
+    "parameter": 3,
+    "value": "256"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 44,
+  "fields": {
+    "product_info": 11,
+    "parameter": 4,
+    "value": "салатовый"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 151,
+  "fields": {
+    "product_info": 37,
+    "parameter": 1,
+    "value": "6.5"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 152,
+  "fields": {
+    "product_info": 37,
+    "parameter": 2,
+    "value": "2688x1242"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 153,
+  "fields": {
+    "product_info": 37,
+    "parameter": 3,
+    "value": "512"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 154,
+  "fields": {
+    "product_info": 37,
+    "parameter": 4,
+    "value": "золотистый"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 155,
+  "fields": {
+    "product_info": 38,
+    "parameter": 1,
+    "value": "6.1"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 156,
+  "fields": {
+    "product_info": 38,
+    "parameter": 2,
+    "value": "1792x828"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 157,
+  "fields": {
+    "product_info": 38,
+    "parameter": 3,
+    "value": "256"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 158,
+  "fields": {
+    "product_info": 38,
+    "parameter": 4,
+    "value": "красный"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 159,
+  "fields": {
+    "product_info": 39,
+    "parameter": 1,
+    "value": "6.1"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 160,
+  "fields": {
+    "product_info": 39,
+    "parameter": 2,
+    "value": "1792x828"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 161,
+  "fields": {
+    "product_info": 39,
+    "parameter": 3,
+    "value": "256"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 162,
+  "fields": {
+    "product_info": 39,
+    "parameter": 4,
+    "value": "черный"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 163,
+  "fields": {
+    "product_info": 40,
+    "parameter": 1,
+    "value": "6.1"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 164,
+  "fields": {
+    "product_info": 40,
+    "parameter": 2,
+    "value": "1792x828"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 165,
+  "fields": {
+    "product_info": 40,
+    "parameter": 3,
+    "value": "256"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 166,
+  "fields": {
+    "product_info": 40,
+    "parameter": 4,
+    "value": "синий"
+  }
+},
+{
+  "model": "backend.productparameter",
+  "pk": 167,
+  "fields": {
+    "product_info": 40,
+    "parameter": 5,
+    "value": "Связной"
+  }
+},
+{
+  "model": "backend.contact",
+  "pk": 1,
+  "fields": {
+    "user": 6,
+    "city": "Пенза",
+    "street": "Живописная",
+    "house": "5",
+    "structure": "",
+    "building": "",
+    "apartment": "",
+    "phone": "987654333"
+  }
+},
+{
+  "model": "backend.contact",
+  "pk": 2,
+  "fields": {
+    "user": 25,
+    "city": "Moscow",
+    "street": "Тверская",
+    "house": "26",
+    "structure": "1",
+    "building": "1",
+    "apartment": "",
+    "phone": "242424323423"
+  }
+},
+{
+  "model": "backend.order",
+  "pk": 1,
+  "fields": {
+    "user": 6,
+    "dt": "2023-05-28T13:51:34.596Z",
+    "state": "new",
+    "contact": 1
+  }
+},
+{
+  "model": "backend.order",
+  "pk": 2,
+  "fields": {
+    "user": 6,
+    "dt": "2023-05-29T08:41:09.564Z",
+    "state": "new",
+    "contact": 1
+  }
+},
+{
+  "model": "backend.orderitem",
+  "pk": 1,
+  "fields": {
+    "order": 1,
+    "product_info": 10,
+    "quantity": 10
+  }
+},
+{
+  "model": "backend.orderitem",
+  "pk": 3,
+  "fields": {
+    "order": 2,
+    "product_info": 11,
+    "quantity": 7
+  }
+},
+{
+  "model": "backend.uploadfiles",
+  "pk": 1,
+  "fields": {
+    "user": 8,
+    "email": "manager1@tips-tricks.ru",
+    "name": "ozon",
+    "file": "files/ozon_7I4Id95.yaml"
+  }
+},
+{
+  "model": "backend.uploadfiles",
+  "pk": 2,
+  "fields": {
+    "user": 8,
+    "email": "manager1@tips-tricks.ru",
+    "name": "ozon2",
+    "file": "files/ozon_28HDpZG.yaml"
+  }
+},
+{
+  "model": "backend.uploadfiles",
+  "pk": 3,
+  "fields": {
+    "user": 8,
+    "email": "manager1@tips-tricks.ru",
+    "name": "ozon3",
+    "file": "files/ozon_g5chhiS.yaml"
+  }
+},
+{
+  "model": "backend.uploadfiles",
+  "pk": 5,
+  "fields": {
+    "user": 26,
+    "email": "manager2@tips-tricks.ru",
+    "name": "tele2",
+    "file": "files/tele2.yaml"
+  }
+}
+]

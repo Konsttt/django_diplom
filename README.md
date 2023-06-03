@@ -47,3 +47,5 @@ python manage.py createsuperuser
 Много на это потратил времени, чтобы выяснить. Выход: или на удалённом сервере развернуть проект для тестирования,
 или через Postman. Сделал запрос загрузки файлов с товарами на сервер через Postman.
 В файле requests_test.http есть описание как это сделать в Postman.
+
+- python manage.py dumpdata --exclude auth.permission --exclude contenttypes --indent 2 > test_db.json
