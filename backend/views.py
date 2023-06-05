@@ -474,9 +474,9 @@ class ContactViewSet(ModelViewSet):
 
     # Переопределение метода, чтобы пользователи видели только свои контакты, а админ и менеджеры магазина все.
     def get_queryset(self):
-        queryset = Contact.objects.all()
+        queryset = Contact.objects.all().order_by('user_id')
         if not (self.request.user.is_staff or self.request.user.type == 'shop'):
-            queryset = queryset.filter(user_id=self.request.user.id)
+            queryset = queryset.filter(user_id=self.request.user.id).order_by('city')
         return queryset
 
 

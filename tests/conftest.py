@@ -17,13 +17,11 @@ def client():
 def user_factory():
     def factory(*args, **kwargs):
         return baker.make(User, *args, **kwargs)
-
     return factory
 
 
 @pytest.fixture
 def contact_factory(user_factory):
     def factory(*args, **kwargs):
-        return baker.make('backend.Contact', user__id=user_factory().id)
-
+        return baker.make('backend.Contact', user=user_factory())
     return factory
