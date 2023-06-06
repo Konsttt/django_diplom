@@ -25,3 +25,6 @@ def contact_factory(user_factory):
     def factory(*args, **kwargs):
         return baker.make('backend.Contact', user=user_factory())
     return factory
+
+
+
