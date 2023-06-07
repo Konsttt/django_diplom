@@ -2,6 +2,7 @@ pytest
 pytest-cov
 pytest-django
 model_bakery
+drf-spectacular
 
 django
 djangorestframework

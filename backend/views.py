@@ -9,8 +9,11 @@ from django.db.models import Q, Sum, F
 from django.http import JsonResponse
 from django.shortcuts import render
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, inline_serializer, OpenApiExample
 
 from requests import get
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
 from rest_framework.generics import ListAPIView
@@ -26,7 +29,7 @@ from backend.models import Shop, Category, Product, ProductInfo, Parameter, Prod
     Contact, ConfirmEmailToken, User, UploadFiles
 from backend.permissions import IsOwnerAdminOrReadOnly, IsOwnerOrAdmin
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
-    OrderItemSerializer, OrderSerializer, ContactSerializer, ProductSerializer
+    OrderItemSerializer, OrderSerializer, ContactSerializer, ProductSerializer, LoginSerializer
 from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task, host, new_order_mail_task
 
 
@@ -139,6 +142,18 @@ class AccountDetails(APIView):
             return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
 
+#  region api_documentation
+@extend_schema(tags=["Login/Logout"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Открытие формы для ввода логина(email) и пароля",
+    ),
+    post=extend_schema(
+        summary="Ввод логина(email) и пароля, вход в систему",
+        request=LoginSerializer,
+    ),
+)
+#  endregion
 class LoginAccount(APIView):
     """
     Класс для авторизации пользователей
@@ -167,6 +182,14 @@ class LoginAccount(APIView):
         return render(request, 'backend/login.html', {'form': form})
 
 
+#  region api_documentation
+@extend_schema(tags=["Login/Logout"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Выход пользователя из системы",
+    )
+)
+#  endregion
 class LogoutAccount(APIView):
     """
     Выход пользователя
@@ -266,10 +289,38 @@ class PartnerProductSet(ModelViewSet):
         return queryset
 
 
+#  region api_documentation
+@extend_schema(tags=["Работа с Корзиной, оформление заказа"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Просмотр своей корзины",
+        parameters=[
+            OpenApiParameter(
+                name='Token',
+                location=OpenApiParameter.PATH,
+                description='Token',
+                required=True,
+                type=str,
+            ),
+        ],
+    ),
+    post=extend_schema(
+        summary="Наполнение корзины товарами / создание корзины / добавление товара в козину",
+    ),
+    delete=extend_schema(
+        summary="Удаление товаров из корзины",
+    ),
+    put=extend_schema(
+        summary="Изменение кол-ва товара/товаров в корзине",
+    ),
+)
+#  endregion
 class BasketView(APIView):
     """
-    Класс для работы с корзиной пользователя
-    работа с таблицами Order - корзина пользователя/заказ и OrderView товары из корзины/заказа пользователя
+    Класс для работы с корзиной пользователя.
+    Работа с таблицами:
+     Order - корзина пользователя 'basket'/заказ 'new'
+     OrderView товары из корзины/заказа пользователя
     """
 
     # получить корзину
@@ -480,6 +531,9 @@ class ContactViewSet(ModelViewSet):
         return queryset
 
 
+#  region api_documentation
+@extend_schema(tags=["Работа с Корзиной, оформление заказа"])
+# endregion
 class OrderView(APIView):
     """
     Класс для получения и размещения заказов пользователями

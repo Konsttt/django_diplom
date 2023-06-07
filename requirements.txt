@@ -7,3 +7,4 @@ ujson
 requests
 python-dotenv
 celery
+drf-spectacular

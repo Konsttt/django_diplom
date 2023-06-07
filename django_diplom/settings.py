@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_rest_passwordreset',
     'backend',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -171,9 +172,21 @@ REST_FRAMEWORK = {
 
     ),
 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 }
 
 # Celery settings
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
+# drf-spectacular settings (for api_documentation)
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Post API",  # название проекта
+    "VERSION": "0.0.1",  # версия проекта
+    "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
+    "SWAGGER_UI_SETTINGS": {
+        "filter": True,  # включить поиск по тегам
+    },
+    "COMPONENT_SPLIT_REQUEST": True,
+}

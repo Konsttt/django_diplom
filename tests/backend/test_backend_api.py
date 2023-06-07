@@ -306,7 +306,7 @@ def test_post_basket(client, user_factory, contact_factory):
     view = ContactViewSet.as_view(actions={'post': 'create'})
     response = view(request)
     assert response.status_code == 201
-    # из корзины создаём контакт
+    # из корзины оформляем заказ
     client.force_authenticate(user=user, token=user.auth_token)
     response = client.post(f'http://{host}:8000/api/v1/order',
                            {'id': str(Order.objects.get(user_id=user.id).id),

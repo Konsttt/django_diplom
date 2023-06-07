@@ -1,8 +1,29 @@
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from rest_framework import serializers
 
 from backend.models import User, Category, Shop, ProductInfo, Product, ProductParameter, OrderItem, Order, Contact
 
 
+#  region api_documentation
+@extend_schema_serializer(
+    exclude_fields=('id', 'structure', 'building'),
+    examples=[
+        OpenApiExample(
+            'Valid example 1',
+            summary='CRUD только своих контактов. Просмотр всех контактов менеджером.',
+            value={
+                'city': 'Москва',
+                'street': 'Садовая',
+                'house': '5',
+                'apartment': '1',
+                'phone': '1234567',
+                'user': 1,
+            },
+            request_only=True,  # signal that example only applies to requests
+            response_only=False,  # signal that example only applies to responses
+        ),
+    ])
+# endregion
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
@@ -20,6 +41,28 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'first_name', 'last_name', 'email', 'company', 'position', 'contacts')
         read_only_fields = ('id',)
+
+
+# Данный сериалайзер применяется в drf-spectacular
+#  region api_documentation
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            'Пример:',
+            summary='Логин пользователя по email и паролю',
+            value={
+                'email': 'user1@tips-tricks.ru',
+                'password': 'Qqq111!!!',
+            },
+            # request_only=True,  # signal that example only applies to requests
+            # response_only=False,  # signal that example only applies to responses
+        ),
+    ])
+# endregion
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'password')
 
 
 class CategorySerializer(serializers.ModelSerializer):
