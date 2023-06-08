@@ -34,16 +34,36 @@ class ContactSerializer(serializers.ModelSerializer):
         }
 
 
+#  region api_documentation
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            'Example 1',
+            summary='Создание нового пользователя. (Новая запись в БД в таблице backend_users)',
+            value={
+                'email': 'user3@tips-tricks.ru',
+                'password': 'Qqq111!!!',
+                'first_name': 'User3',
+                'last_name': 'Userovich3',
+                'phone': '123456789',
+                'company': 'SpaceX',
+                'position': 'python backend',
+            },
+            request_only=True,  # signal that example only applies to requests
+            response_only=False,  # signal that example only applies to responses
+        ),
+    ])
+# endregion
 class UserSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(read_only=True, many=True)
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'company', 'position', 'contacts')
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'company', 'position', 'contacts')
         read_only_fields = ('id',)
 
 
-# Данный сериалайзер применяется в drf-spectacular
+# Данный сериалайзер применяется только в drf-spectacular
 #  region api_documentation
 @extend_schema_serializer(
     examples=[
@@ -51,7 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
             'Пример:',
             summary='Логин пользователя по email и паролю',
             value={
-                'email': 'user1@tips-tricks.ru',
+                'email': 'user3@tips-tricks.ru',
                 'password': 'Qqq111!!!',
             },
             # request_only=True,  # signal that example only applies to requests
@@ -65,6 +85,18 @@ class LoginSerializer(serializers.ModelSerializer):
         fields = ('email', 'password')
 
 
+#  region api_documentation
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            'Пример:',
+            summary='Изменение названия Категории товаров',
+            value={
+                'name': 'SSD диски',
+            },
+        ),
+    ])
+# endregion
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -118,7 +150,18 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderItemCreateSerializer(OrderItemSerializer):
     product_info = ProductInfoSerializer(read_only=True)
 
-
+#  region api_documentation
+@extend_schema_serializer(
+    exclude_fields=('total_sum',),
+    examples=[
+         OpenApiExample(
+            'Valid example 1',
+            summary='Создание Заказа из Корзины',
+            value={'id': "5", 'contact': 4},
+         ),
+    ]
+)
+# endregion
 class OrderSerializer(serializers.ModelSerializer):
     ordered_items = OrderItemCreateSerializer(read_only=True, many=True)
 

@@ -187,6 +187,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
     "SWAGGER_UI_SETTINGS": {
         "filter": True,  # включить поиск по тегам
+        "tagsSorter": True,
+
     },
     "COMPONENT_SPLIT_REQUEST": True,
+    "SORT_OPERATIONS": False,
+    'SORT_OPERATION_PARAMETERS': False,
 }

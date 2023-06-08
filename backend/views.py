@@ -33,9 +33,28 @@ from backend.serializers import UserSerializer, CategorySerializer, ShopSerializ
 from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task, host, new_order_mail_task
 
 
+#  region api_documentation
+@extend_schema(tags=["Регистрация пользователя, подтверждение регистрации"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Открытие формы регистрации:  для ввода логина(email), пароля и других полей регистрации",
+    ),
+    post=extend_schema(
+        summary="Регистрация:  отправка данных, результат - запись в БД логина(email), пароля и др. полей, "
+                "отправка письма со ссылкой для подтверждения",
+        description="В результате данного запроса пользователь записывается в БД, но не активирован. "
+                    "Не сможет залогиниться пока не пройдёт по ссылке в письме. "
+                    "Пройдя по ссылке - пользователь активируется, создаётся его постоянный токен."
+                    "Теперь пользователь может логиниться.  "
+                    "Чтобы пользователя перевести в статус менеджера - таких запросов в целях безопасности нет, "
+                    "это может сделать только админ, через свою админку.",
+        request=UserSerializer,
+    ),
+)
+#  endregion
 class RegisterAccount(APIView):
     """
-    Для регистрации покупателей
+    Регистрация пользователей.
     """
 
     # Регистрация методом POST
@@ -73,6 +92,21 @@ class RegisterAccount(APIView):
         return render(request, 'backend/register.html', {'form': form})
 
 
+#  region api_documentation
+@extend_schema(tags=["Регистрация пользователя, подтверждение регистрации"],
+               parameters=[
+                   OpenApiParameter("email", OpenApiTypes.STR, OpenApiParameter.QUERY),
+                   # serializer object is converted to a parameter
+                   OpenApiParameter("token", OpenApiTypes.STR, OpenApiParameter.QUERY,
+                                    description='Кроме почты токен можно взять из таблицы backend_confirmemailtoken'),
+               ],
+               )
+@extend_schema_view(
+    get=extend_schema(
+        summary="Подтверждение регистрации: клик по ссылке в письме пользователя.",
+    ),
+)
+#  endregion
 class ConfirmAccount(APIView):
     """
     Класс для подтверждения почтового адреса
@@ -147,6 +181,8 @@ class AccountDetails(APIView):
 @extend_schema_view(
     get=extend_schema(
         summary="Открытие формы для ввода логина(email) и пароля",
+        description="Если пользователь уже аутентифицирован и повторно хочет открыть форму ввода логина и пароля, "
+                    "то ему открывается сразу страница приветствия."
     ),
     post=extend_schema(
         summary="Ввод логина(email) и пароля, вход в систему",
@@ -161,10 +197,8 @@ class LoginAccount(APIView):
 
     # Авторизация методом POST
     def post(self, request, *args, **kwargs):
-
         if {'email', 'password'}.issubset(request.data):
             user = authenticate(request, username=request.data['email'], password=request.data['password'])
-
             if user is not None:
                 if user.is_active:
                     token, _ = Token.objects.get_or_create(user=user)
@@ -178,6 +212,10 @@ class LoginAccount(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
     def get(self, request):
+        # Если пользователь уже аутентифицирован и повторно логиниться, то открываем начальную страницу
+        if request.user.is_authenticated:
+            return render(request, 'backend/success_login.html',
+                          {'first_name': request.user.first_name, 'last_name': request.user.last_name})
         form = LoginForm()
         return render(request, 'backend/login.html', {'form': form})
 
@@ -209,18 +247,35 @@ class LogoutAccount(APIView):
         return JsonResponse({'Status': False, 'Message': 'Your are already logout'})
 
 
+#  region api_documentation
+@extend_schema(tags=["Категории товаров"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Вывод всех категорий товаров",
+    )
+)
+#  endregion
 # по умолчанию только get метод, если в классе не определён ни один метод
 class CategoryView(ListAPIView):
     """
-    Класс для просмотра категорий
+    Класс для просмотра всех категорий любым пользователем/анонимом
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
+#  region api_documentation
+@extend_schema(tags=["Категории товаров"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Вывод менеджером только своих Категорий",
+    )
+)
+#  endregion
 class PartnerCategorySet(ModelViewSet):
     """
-    Класс для редактирования своих категорий менеджерами
+    Класс для редактирования своих Категорий товаров менеджерами или любой категории админом.
+    Менеджер магазина видит только свои Категории.
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -532,11 +587,26 @@ class ContactViewSet(ModelViewSet):
 
 
 #  region api_documentation
-@extend_schema(tags=["Работа с Корзиной, оформление заказа"])
-# endregion
+@extend_schema(tags=["Работа с Корзиной, оформление Заказа"])
+@extend_schema_view(
+    get=extend_schema(
+        summary="Просмотр всех своих оформленных Заказов",
+    ),
+    post=extend_schema(
+        summary="Создать Заказ из Корзины. Статус заказа меняется с basket на new. "
+                "Заказчику отправляется письмо-подтверждение.",
+        description="Оформление заказа из корзины: "
+                    "(в json запросе передаются id-корзины и id-адреса_доставки_пользователя, "
+                    "т.к. корзин и контактво может быть у пользователя несколько) "
+                    "У заказа статус меняется на new, на почту пользователю отправляется письмо - что заказ оформлен. "
+                    "(Небольшой нюанс: id корзины передаётся строкой, id контакта - числом.)",
+        request=OrderSerializer,
+    ),
+)
+#  endregion
 class OrderView(APIView):
     """
-    Класс для получения и размещения заказов пользователями
+    Класс для создания из Корзины Заказа и просмотра своих Заказов.
     """
 
     # просмотр всех своих заказов (оформленных, не корзины)
@@ -590,11 +660,6 @@ class OrderView(APIView):
 class UploadFilesView(APIView):
     """
    Загрузка файлов с товарами с локального компьютера в БД через форму в браузере.
-
-   В браузере на localhost не получится тестировать, т.к. не хранит токены/сессии именно с localhost, или точнее
-   в целях безопасности на уровне django это заблокировано - https://code.djangoproject.com/ticket/10560
-   Решение - Postman, или развернуть на удалённом сервере и тестировать.
-   (файлы в папку медиа можно также загружать через админку джанго. Эту форму в админку добавил)
    """
 
     def post(self, request, *args, **kwargs):
