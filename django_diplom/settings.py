@@ -174,6 +174,11 @@ REST_FRAMEWORK = {
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '20/minute',
+        'anon': '10/minute',
+        },
+
 }
 
 # Celery settings
@@ -182,7 +187,7 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 # drf-spectacular settings (for api_documentation)
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Post API",  # название проекта
+    "TITLE": "django_diplom API",  # название проекта
     "VERSION": "0.0.1",  # версия проекта
     "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
     "SWAGGER_UI_SETTINGS": {

@@ -11,19 +11,17 @@ from django.shortcuts import render
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, inline_serializer, OpenApiExample
-
 from requests import get
-from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
-
 from backend.forms import UploadFilesForm, LoginForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken, User, UploadFiles
@@ -56,6 +54,7 @@ class RegisterAccount(APIView):
     """
     Регистрация пользователей.
     """
+    throttle_classes = [UserRateThrottle]
 
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
@@ -98,7 +97,8 @@ class RegisterAccount(APIView):
                    OpenApiParameter("email", OpenApiTypes.STR, OpenApiParameter.QUERY),
                    # serializer object is converted to a parameter
                    OpenApiParameter("token", OpenApiTypes.STR, OpenApiParameter.QUERY,
-                                    description='Кроме почты токен можно взять из таблицы backend_confirmemailtoken'),
+                                    description='Кроме почты токен можно взять из таблицы '
+                                                'backend_confirmemailtoken'),
                ],
                )
 @extend_schema_view(
@@ -138,6 +138,8 @@ class AccountDetails(APIView):
     """
     Класс для работы с данными пользователя
     """
+
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # получить данные пользователя
     def get(self, request, *args, **kwargs):
@@ -262,7 +264,7 @@ class CategoryView(ListAPIView):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
 #  region api_documentation
 @extend_schema(tags=["Категории товаров"])
@@ -296,12 +298,13 @@ class ShopView(ListAPIView):
     """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
-
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
 class ProductInfoView(APIView):
     """
     Класс для поиска товаров по магазину и/или категории товаров
     """
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self, request, *args, **kwargs):
 
@@ -377,6 +380,8 @@ class BasketView(APIView):
      Order - корзина пользователя 'basket'/заказ 'new'
      OrderView товары из корзины/заказа пользователя
     """
+
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # получить корзину
     def get(self, request, *args, **kwargs):
@@ -475,7 +480,7 @@ class PartnerUpdate(APIView):
     Класс для обновления прайса от поставщика
     """
 
-    # Форма c выпадающим списком всех загруженных файлов менеджера магазина.
+    # Форма с выпадающим списком всех загруженных файлов менеджера магазина.
     def get(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
@@ -577,6 +582,7 @@ class ContactViewSet(ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated, IsOwnerAdminOrReadOnly]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # Переопределение метода, чтобы пользователи видели только свои контакты, а админ и менеджеры магазина все.
     def get_queryset(self):
@@ -608,6 +614,8 @@ class OrderView(APIView):
     """
     Класс для создания из Корзины Заказа и просмотра своих Заказов.
     """
+
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # просмотр всех своих заказов (оформленных, не корзины)
     def get(self, request, *args, **kwargs):
@@ -694,6 +702,7 @@ class ResetPassword(ResetPasswordRequestToken):
     """
     Класс для сброса пароля
     """
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # Переопределение метода post родительского класса ради Celery
     def post(self, request, *args, **kwargs):
@@ -715,6 +724,7 @@ class ResetPassword(ResetPasswordRequestToken):
 
 
 class EnterNewPassword(ResetPasswordConfirm):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # Форма для ввода почты (для любого пользователя)
     def get(self, request):

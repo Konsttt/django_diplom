@@ -6,7 +6,6 @@ import os
 from backend.models import Contact, Shop, Category, ProductInfo, Product, Order, OrderItem
 from backend.views import ContactViewSet
 
-
 host = os.getenv('SERVER_HOST')
 
 
@@ -327,3 +326,18 @@ def test_get_order(client, user_factory):
     # get-запрос
     response = client.get(f'http://{host}:8000/api/v1/order')
     assert response.status_code == 200
+
+
+# Тест на троттлинг. Аноним обновляет 10 раз страницу с товарами.
+@pytest.mark.django_db
+def test_throttle_get_products(client):
+    # Цикл 9 раз, т.к. выше уже есть 1 такой запрос (Итого 10 запросов отрабатывает).
+    for _ in range(9):
+        # get-запрос в лимите троттлинга
+        response = client.get(f'http://{host}:8000/api/v1/products')
+        assert response.status_code == 200
+    # На 11 запросе отрабатывает ограничение по троттлингу
+    response = client.get(f'http://{host}:8000/api/v1/products')
+    assert response.status_code == 429  # HTTP 429 Too Many Requests
+
+
