@@ -1,5 +1,4 @@
 import datetime
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -7,10 +6,10 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django_rest_passwordreset.views import ResetPasswordRequestToken, ResetPasswordConfirm
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, inline_serializer, OpenApiExample
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from requests import get
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
@@ -29,6 +28,7 @@ from backend.permissions import IsOwnerAdminOrReadOnly, IsOwnerOrAdmin
 from backend.serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer, ProductSerializer, LoginSerializer
 from backend.tasks import new_user_registered_mail_task, password_reset_token_mail_task, host, new_order_mail_task
+from time import sleep
 
 
 #  region api_documentation
@@ -77,6 +77,9 @@ class RegisterAccount(APIView):
                 if user_serializer.is_valid():
                     # сохраняем пользователя
                     user = user_serializer.save()
+                    # ! Вновь создаваемый пользователь, кроме пользователей авторизующихся через социальные сети,
+                    # всегда не активирован! Активация происходит по ссылке на email - в методе 'user-register-confirm'
+                    user.is_active = False
                     user.set_password(request.data['password'])
                     user.save()
                     new_user_registered_mail_task.delay(user_id=user.id)
@@ -249,6 +252,15 @@ class LogoutAccount(APIView):
         return JsonResponse({'Status': False, 'Message': 'Your are already logout'})
 
 
+# Для редиректа с джанговского url 'accounts/profile/',
+# куда по умолчанию осуществляется переход после подтверждения данных авторизации из VK,
+# на свою страничку с логином
+def redirect_login_view(request):
+    response = redirect('backend:user-login')
+    return response
+
+
+
 #  region api_documentation
 @extend_schema(tags=["Категории товаров"])
 @extend_schema_view(
@@ -299,6 +311,7 @@ class ShopView(ListAPIView):
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
 
 class ProductInfoView(APIView):
     """
@@ -726,13 +739,41 @@ class ResetPassword(ResetPasswordRequestToken):
 class EnterNewPassword(ResetPasswordConfirm):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
-    # Форма для ввода почты (для любого пользователя)
+    # Форма для ввода почты
     def get(self, request):
+        email = self.request.query_params.get('email')
+        token = self.request.query_params.get('token')
+
+        # Если запрос без параметров (т.е. напрямую, а не по ссылке из письма), то выбрасывает на страничку с логином
+        if not token or not email:
+            return render(request, 'backend/bad_token.html')
+
+        user = User.objects.filter(email=email).first()
+        # Если в базе нет такого пользователя
+        if not user:
+            sleep(10)
+            return JsonResponse({'Status': False, 'Errors': 'Very bad request!'})
+        db_token = ResetPasswordToken.objects.filter(user=user).first()
+        # Если в базе нет токена для сброса у данного пользователя
+        if not db_token:
+            sleep(10)
+            return JsonResponse({'Status': False, 'Errors': 'Very bad request!'})
+        # И наконец и пользователь есть и токен есть, но токен из запроса не равен токену в базе
+        if not token == db_token.key:
+            sleep(10)
+            return JsonResponse({'Status': False, 'Errors': 'Very bad request!'})
+
+        # Если токены в запросе и БД совпадают, то открываем форму для ввода нового пароля
         form = EnterNewPasswordForm(initial={'token': self.request.query_params['token']})
         return render(request, 'backend/enter_new_password.html', {'form': form})
 
+    # Запрос post в родительском классе корректно обрабатывает соответствие и логина и токена,
+    # поэтому дополнительных проверок на соответствие как в get не требуется
     def post(self, request, *args, **kwargs):
         status = super(EnterNewPassword, self).post(request)
-        if status.status_code == 200:  # родительская функция отработала хорошо (и могла бы отправить сигнал-письмо)
+        # родительская функция класса ResetPasswordConfirm отработала хорошо
+        # и могла бы отправить сигнал-письмо, но здесь нужно от неё нужны только проверки и обновление пароля,
+        # т.к. от сигналов отказались в пользу celery - task
+        if status.status_code == 200:
             return render(request, 'backend/success_enter_new_password.html')
         return status

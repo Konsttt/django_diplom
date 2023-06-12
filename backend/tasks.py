@@ -47,7 +47,7 @@ def password_reset_token_mail_task(token, email, first_name, last_name):
         # title:
         f"Password Reset Token for {first_name} {last_name}",
         # message:
-        f"http://{host}:8000/api/v1/user/password_reset/confirm?token={token}",
+        f"http://{host}:8000/api/v1/user/password_reset/confirm?token={token}&email={email}",
         # from:
         settings.EMAIL_HOST_USER,
         # to:

@@ -31,10 +31,6 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
 
-# SESSION_COOKIE_SECURE = True  # Долго же я помучился. На локалхост в браузере куки сессии не хранятся!!! Ссылка ниже.
-# SESSION_COOKIE_DOMAIN = "127.0.0.1"  #  https://code.djangoproject.com/ticket/10560  Решений нет. Только Postman.
-# SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,6 +46,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'backend',
     'drf_spectacular',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -67,8 +64,7 @@ ROOT_URLCONF = 'django_diplom.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / "backend/templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,6 +73,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -199,3 +197,29 @@ SPECTACULAR_SETTINGS = {
     "SORT_OPERATIONS": False,
     'SORT_OPERATION_PARAMETERS': False,
 }
+
+# OAuth2 vk.com settings (PiPy social-auth-app-django)
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+SOCIAL_AUTH_VK_OAUTH2_KEY = os.getenv('VK_APP_ID')  # На dev.vk.com создать приложение и в настройках взять его ID
+SOCIAL_AUTH_VK_OAUTH2_SECRET = os.getenv('VK_APP_PROTECTED_KEY')  # Там же скопировать 'Защищённый ключ'
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.vk.VKOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+
+)
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    # 'social_core.pipeline.social_auth. associate_by_email',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+SOCIAL_AUTH_INACTIVE_USER_URL = '/inactive-user/'
+SOCIAL_AUTH_USER_MODEL = 'backend.User'

@@ -18,9 +18,16 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from backend.views import redirect_login_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('backend.urls', namespace='backend')),
     path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/v1/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
+    path('', include('social_django.urls')),
+    # По умолчанию запросы social_django завершаются на "родных" джанговских темплейтах, импортируем их
+    path('accounts/', include('django.contrib.auth.urls')),
+    # Редирект с джанговского темплейта на свой темплейт с логином
+    path('accounts/profile/', redirect_login_view),
 ]

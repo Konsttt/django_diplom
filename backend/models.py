@@ -83,7 +83,12 @@ class User(AbstractUser):
     )
     is_active = models.BooleanField(
         _('active'),
-        default=False,
+        # Было default=False изначально. Поменял на True для social-django-auth,
+        # там пользователь логинится только с True.
+        # https://python-social-auth.readthedocs.io/en/latest/configuration/settings.html#user-model
+        # Но в функции register-account первоначального создания пользователя перевожу этот параметр в False.
+        # А уже после подтверждения по почте, снова True.
+        default=True,
         help_text=_(
             'Designates whether this user should be treated as active. '
             'Unselect this instead of deleting accounts.'
