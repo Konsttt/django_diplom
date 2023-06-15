@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/to_env.txt python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

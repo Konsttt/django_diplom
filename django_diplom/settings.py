@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import warnings
+from django.utils.deprecation import RemovedInDjango51Warning
 
 from dotenv import load_dotenv
 
@@ -28,6 +30,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
+# После установки silk появился при тестах этот warning.
+# В pytest.ini - не получалось как это сделать. Нашёл как отключить в settings.py
+if DEBUG:
+    warnings.simplefilter('default')
+    warnings.filterwarnings('ignore', category=RemovedInDjango51Warning)
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS')]
 
@@ -231,3 +238,7 @@ SOCIAL_AUTH_USER_MODEL = 'backend.User'
 # yandex social auth
 SOCIAL_AUTH_YANDEX_OAUTH2_KEY = os.getenv('YA_APP_ID')
 SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = os.getenv('YA_APP_PROTECTED_KEY')
+
+# silky profiling
+SILKY_PYTHON_PROFILER = True
+# SILKY_PYTHON_PROFILER_BINARY = True  # Для генерации двоичного файла .prof

@@ -6,5 +6,14 @@ pyyaml
 ujson
 requests
 python-dotenv
+
 celery
+
+pytest
+pytest-cov
+pytest-django
+model_bakery
+
 drf-spectacular
+
+django-silk

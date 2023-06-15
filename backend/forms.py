@@ -1,7 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import PasswordResetForm
 from backend.models import UploadFiles, User, Contact
-from backend.tasks import password_reset_token_mail_task
 
 
 class UploadFilesForm(forms.ModelForm):

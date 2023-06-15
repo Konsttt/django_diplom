@@ -6,7 +6,7 @@ __pycache__/
 *$py.class
 
 *.sqlite3
-env/
+to_env.txt/
 
 ### Project specific ###
 settings_local.py
@@ -99,9 +99,9 @@ celerybeat-schedule
 # Environments
 .env
 .venv
-env/
+to_env.txt/
 venv/
-ENV/
+to_env.txt/
 env.bak/
 venv.bak/
 

@@ -23,6 +23,7 @@ from backend.views import redirect_login_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('backend.urls', namespace='backend')),
+    # Удобная api-документация
     path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/v1/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
     path('', include('social_django.urls')),
@@ -30,5 +31,6 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     # Редирект с джанговского темплейта на свой темплейт с логином
     path('accounts/profile/', redirect_login_view),
+    # Удобный анализатор запросов
     path('silk/', include('silk.urls', namespace='silk'))
 ]

@@ -1,0 +1,19 @@
+# Файл для преобразования в ваш .env файл:
+SECRET_KEY=хххххххххххххххххххххх  # любой набор знаков
+DEBUG=True
+ALLOWED_HOSTS=*
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=ххххх
+DB_USER=ххххх
+DB_PASSWORD=ххххх
+DB_HOST=localhost
+DB_PORT=5432
+SERVER_HOST=ххххх # localhost или если сервер с проектом удалённый или wsl - то ip-адрес хоста
+EMAIL_HOST=xxxxx # адрес почтового сервера (имя или ip), например mail.example.ru
+EMAIL_HOST_USER=xxxxx # ваш email, от имени которого будут рассылаться письма
+EMAIL_HOST_PASSWORD=ххххх # пароль от вашей почты
+SERVER_EMAIL=xxxxx # адрес почтового сервера, например example.ru
+VK_APP_ID=ххххх  # взять из настроек своего приложения, которое нужно создать на dev.vk
+VK_APP_PROTECTED_KEY=ххххх  # secret_key - там же
+YA_APP_ID=ххххх  # взять из настроек своего приложения, которое нужно создать на oauth.yandex
+YA_APP_PROTECTED_KEY=ххххх  # Client secret - там же

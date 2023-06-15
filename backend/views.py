@@ -1,5 +1,4 @@
 import datetime
-import os
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
@@ -23,7 +22,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
-from backend.forms import UploadFilesForm, LoginForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm
+from backend.forms import UploadFilesForm, RegisterForm, ResetPasswordForm, EnterNewPasswordForm, LoginForm
 from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken, User, UploadFiles
 from backend.permissions import IsOwnerAdminOrReadOnly, IsOwnerOrAdmin
@@ -224,8 +223,7 @@ class LoginAccount(APIView):
             return render(request, 'backend/success_login.html',
                           {'first_name': request.user.first_name, 'last_name': request.user.last_name})
         form = LoginForm()
-        ya_id = os.getenv('YA_APP_ID')
-        return render(request, 'backend/login.html', {'form': form, 'ya_id': ya_id})
+        return render(request, 'backend/login.html', {'form': form})
 
 
 #  region api_documentation
@@ -240,14 +238,7 @@ class LogoutAccount(APIView):
     """
     Выход пользователя
     """
-
     def get(self, request):
-        # token = request.auth.pk
-        # token_db = Token.objects.get(key=token)
-        # if token_db:
-        #     logout_user_id = token_db.user_id
-        #     logout_user_email = User.objects.get(id=logout_user_id).email
-        #     logout(request)
         if request.user.is_authenticated:
             logout_user_email = request.user.email
             logout(request)  # Очистка сессии на клиенте (браузере) !!!
@@ -601,9 +592,9 @@ class ContactViewSet(ModelViewSet):
 
     # Переопределение метода, чтобы пользователи видели только свои контакты, а админ и менеджеры магазина все.
     def get_queryset(self):
-        queryset = Contact.objects.all().order_by('user_id')
+        queryset = Contact.objects.all().select_related().order_by('user')
         if not (self.request.user.is_staff or self.request.user.type == 'shop'):
-            queryset = queryset.filter(user_id=self.request.user.id).order_by('city')
+            queryset = queryset.filter(user=self.request.user).order_by('city')
         return queryset
 
 
