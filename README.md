@@ -51,9 +51,9 @@ python -m celery -A django_diplom worker -l info
 source ./venv/bin/activate
 pytest --cov=backend
 ```
-11. Документация API: http://<yourserver>:8000/api/v1/docs/
-12. Анализ/оптимизация запросов: http://<yourserver>:8000/silk/
-    (если сервер не удалённый, то <yourserver> это localhost)
+11. Документация API: http://yourserver:8000/api/v1/docs/
+12. Анализ/оптимизация запросов: http://yourserver:8000/silk/
+    (если сервер не удалённый, то yourserver это localhost)
 
 ### Что реализовано:
 - регистрация, подтверждение регистрации по email, авторизация пользователей;
