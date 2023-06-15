@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Вход</title>
 </head>
 <body>
 
@@ -13,11 +13,14 @@
 	{{form.as_p}}
 	<input type="submit" value="Login" />
 </form>
-
 {% endblock content%}
+
 <p> </p>
 <p> </p>
-<a href="/login/vk-oauth2">VK</a><p>
+<a href="/login/vk-oauth2">Войти через VK</a>
+<p> </p>
+<a href="/login/yandex-oauth2">Войти через Yandex</a>
+<p> </p>
 <p> </p>
 <p> </p>
 <p><a href="{% url 'backend:password-reset' %}">Забыли пароль?</a></p>

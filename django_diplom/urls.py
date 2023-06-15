@@ -30,4 +30,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     # Редирект с джанговского темплейта на свой темплейт с логином
     path('accounts/profile/', redirect_login_view),
+    path('silk/', include('silk.urls', namespace='silk'))
 ]

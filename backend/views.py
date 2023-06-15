@@ -1,4 +1,6 @@
 import datetime
+import os
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -222,7 +224,8 @@ class LoginAccount(APIView):
             return render(request, 'backend/success_login.html',
                           {'first_name': request.user.first_name, 'last_name': request.user.last_name})
         form = LoginForm()
-        return render(request, 'backend/login.html', {'form': form})
+        ya_id = os.getenv('YA_APP_ID')
+        return render(request, 'backend/login.html', {'form': form, 'ya_id': ya_id})
 
 
 #  region api_documentation
@@ -253,12 +256,11 @@ class LogoutAccount(APIView):
 
 
 # Для редиректа с джанговского url 'accounts/profile/',
-# куда по умолчанию осуществляется переход после подтверждения данных авторизации из VK,
+# куда по умолчанию осуществляется переход после подтверждения данных авторизации из VK/Yandex,
 # на свою страничку с логином
 def redirect_login_view(request):
     response = redirect('backend:user-login')
     return response
-
 
 
 #  region api_documentation
@@ -277,6 +279,7 @@ class CategoryView(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
 
 #  region api_documentation
 @extend_schema(tags=["Категории товаров"])
@@ -550,7 +553,6 @@ class PartnerUpdate(APIView):
                         ProductParameter.objects.create(product_info_id=product_info.id,
                                                         parameter_id=parameter_object.id,
                                                         value=value)
-
                 return render(request, 'backend/success_products_update.html')
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})

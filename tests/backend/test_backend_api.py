@@ -68,8 +68,9 @@ def test_contact_create(client, user_factory, contact_factory):
     contact = contact_factory()
     factory = APIRequestFactory()
     request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                           {'user': user.id, 'city': contact.city,
-                            'street': contact.street, 'phone': contact.phone})
+                           {'user': user.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
     force_authenticate(request, user=user, token=user.auth_token)
     view = ContactViewSet.as_view(actions={'post': 'create'})
     response = view(request)
@@ -84,8 +85,9 @@ def test_contact_anonim_create(client, user_factory, contact_factory):
     contact = contact_factory()
     factory = APIRequestFactory()
     request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                           {'user': user.id, 'city': contact.city,
-                            'street': contact.street, 'phone': contact.phone})
+                           {'user': user.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
     view = ContactViewSet.as_view(actions={'post': 'create'})
     response = view(request)
     assert response.status_code == 403
@@ -100,8 +102,9 @@ def test_get_my_contact(client, user_factory, contact_factory):
     contact = contact_factory()
     factory = APIRequestFactory()
     request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                           {'user': user.id, 'city': contact.city,
-                            'street': contact.street, 'phone': contact.phone})
+                           {'user': user.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
     force_authenticate(request, user=user, token=user.auth_token)
     view = ContactViewSet.as_view(actions={'post': 'create'})
     response = view(request)
@@ -130,8 +133,9 @@ def test_get_all_contact(client, user_factory, contact_factory):
         for _ in range(5):
             contact = contact_factory()
             request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                                   {'user': user.id, 'city': contact.city,
-                                    'street': contact.street, 'phone': contact.phone})
+                                   {'user': user.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
             force_authenticate(request, user=user, token=user.auth_token)
             ContactViewSet.as_view(actions={'post': 'create'})
     # создаём менеджера
@@ -161,8 +165,9 @@ def test_get_own_contact(client, user_factory, contact_factory):
     for _ in range(5):
         contact = contact_factory()
         request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                               {'user': user1.id, 'city': contact.city,
-                                'street': contact.street, 'phone': contact.phone})
+                               {'user': user1.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
         force_authenticate(request, user=user1, token=user1.auth_token)
         view = ContactViewSet.as_view(actions={'post': 'create'})
         view(request)
@@ -175,8 +180,9 @@ def test_get_own_contact(client, user_factory, contact_factory):
     for _ in range(5):
         contact = contact_factory()
         request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                               {'user': user2.id, 'city': contact.city,
-                                'street': contact.street, 'phone': contact.phone})
+                               {'user': user2.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
         citys_2.append(contact.city)
         force_authenticate(request, user=user2, token=user2.auth_token)
         view = ContactViewSet.as_view(actions={'post': 'create'})
@@ -299,8 +305,9 @@ def test_post_basket(client, user_factory, contact_factory):
     contact = contact_factory()
     factory = APIRequestFactory()
     request = factory.post(f'http://{host}:8000/api/v1/user/contact',
-                           {'user': user.id, 'city': contact.city,
-                            'street': contact.street, 'phone': contact.phone})
+                           {'user': user.id, 'city': contact.city, 'street': contact.street,
+                            'house': contact.house, 'apartment': contact.apartment, 'building': contact.building,
+                            'structure': contact.structure, 'phone': contact.phone})
     force_authenticate(request, user=user, token=user.auth_token)
     view = ContactViewSet.as_view(actions={'post': 'create'})
     response = view(request)

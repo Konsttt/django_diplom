@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import PasswordResetForm
-from backend.models import UploadFiles, User
+from backend.models import UploadFiles, User, Contact
 from backend.tasks import password_reset_token_mail_task
 
 
@@ -33,3 +33,9 @@ class ResetPasswordForm(forms.ModelForm):
 class EnterNewPasswordForm(forms.Form):
     token = forms.CharField(min_length=10, max_length=40, widget=forms.HiddenInput())
     password = forms.CharField(min_length=8)
+
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = '__all__'

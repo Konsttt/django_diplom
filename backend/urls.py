@@ -60,6 +60,16 @@ urlpatterns = [
     path('shops', ShopView.as_view(), name='shops'),
     # Поиск товаров по магазину и/или категории товара
     path('products', ProductInfoView.as_view(), name='products'),
+    # # 1. Запрос на авторизацию яндекс
+    # # (первоначальный запрос - редирект ссылкой на yandex с ID приложения в параметрах url)
+    # path('ya_req', ya_first_request, name='ya_req'),
+    # # 2. Ответ яндекса после клика на кнопку подтверждения
+    # # (Redirect URI - нашей странички, указанной в настройках яндекса), возвращается code=xxxxxxx в ответе в url.
+    # # Этот код пересылаем на темплейт ya_confirm.html - где формируется кнопка POST с данным кодом и ссылкой
+    # # для выдачи токена
+    # path('ya', ya_resp, name='ya'),
+    # # 3. Редирект ответа после клика по POST кнопки на наш сайт
+
     # Файлы .yaml с товарами магазинов загружаются и хранятся в папке /media/files/
     # В БД в таблице uploadfiles хранится владелец файла, путь к файлу, название файла
 ] + r.urls + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -13,3 +13,4 @@ ujson
 requests
 python-dotenv
 celery
+django-silk

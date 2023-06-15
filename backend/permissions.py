@@ -8,7 +8,7 @@ from backend.models import Product
 
 class IsOwnerAdminOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.user or request.user.is_staff
+        return request.user == obj.user  # or request.user.is_staff
 
 
 # Чтобы посмотреть владельца редактируемого объекта, пришлось сделать вложенный запрос к БД

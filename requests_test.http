@@ -20,7 +20,7 @@ GET http://localhost:8000/api/v1/user/register/confirm?token=556c6d1de765bdb3eb8
 ###
 
 # аутентификация пользователя (login)
-POST http://localhost:8000/api/v1/user/login
+POST http://192.168.66.75:8000/api/v1/user/login
 Content-Type: application/json
 
 {
@@ -56,15 +56,15 @@ Content-Type: application/json
 
 
 # user contact (добавить новый контакт)
-POST http://localhost:8000/api/v1/user/contact
-Authorization: Token b295f813d6a27bab77959c8183264df36dbf785d  # токен взять из БД из таблицы authtoken_token
+POST http://192.168.66.75:8000/api/v1/user/contact/
+Authorization: Token a6229242707797b554268dfc121082a47b2b75f3  # токен взять из БД из таблицы authtoken_token
 Content-Type: application/json
 
 {
-  "city": "Пенза",
-  "street": "Живописная",
-  "house": "5",
-  "phone": "987654333"
+  "city": "Пенза1",
+  "street": "Живописная1",
+  "house": "51",
+  "phone": "9876543331"
 }
 
 ###
@@ -294,3 +294,24 @@ Authorization: Token 40e578c55750437e1c18393d2e41e1cedd41e560
 # Просмотр(получение) заказов поставщиками (менеджер2 - Ozon)
 GET http://localhost:8000/api/v1/partner/orders
 Authorization: Token c09d17d206d656e781b30e7651c2
+
+###
+
+# Получение кода
+GET https://oauth.yandex.ru/authorize?response_type=code&client_id=12a1d081be78469a8269c5627444b0d9
+
+###
+
+POST https://oauth.yandex.ru/token
+Content-Type: application/json
+
+{"code": "3907007",
+  "client_id": "12a1d081be78469a8269c5627444b0d9",
+  "client_secret": "fca6da9b65c34d6ca0bcef4c47c1d669",
+  "grant_type": "authorization_code"}
+
+###
+
+# Получение данных с yandex
+GET https://login.yandex.ru/info?format=json
+Authorization: OAuth y0_AgAAAAAEICnAAAoJRwAAAADlX3pJ3oKcaMezQvaPDcRGitJt5VX2JIo

@@ -14,7 +14,7 @@ from backend.models import User, Category, Shop, ProductInfo, Product, ProductPa
             value={
                 'city': 'Москва',
                 'street': 'Садовая',
-                'house': '5',
+                'house': '99',
                 'apartment': '1',
                 'phone': '1234567',
                 'user': 1,
@@ -28,10 +28,22 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = ('id', 'city', 'street', 'house', 'structure', 'building', 'apartment', 'user', 'phone')
-        read_only_fields = ('id',)
-        extra_kwargs = {
-            'user': {'write_only': True}
-        }
+        read_only_fields = ('id', 'user')
+
+    # Это переопределение ради того, чтобы только текущий пользователь был создателем объекта
+    def create(self, validated_data):
+        contact = Contact(
+            city=validated_data['city'],
+            street=validated_data['street'],
+            house=validated_data['house'],
+            structure=validated_data['structure'],
+            building=validated_data['building'],
+            apartment=validated_data['apartment'],
+            phone=validated_data['phone'],
+            user=self.context['request'].user  # Вот здесь однозначно создатель объекта - только текущий пользователь
+        )
+        contact.save()
+        return contact
 
 
 #  region api_documentation

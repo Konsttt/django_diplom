@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'backend',
     'drf_spectacular',
     'social_django',
+    'silk',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'django_diplom.urls'
@@ -128,7 +130,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = "/media/"
@@ -204,6 +207,7 @@ SOCIAL_AUTH_VK_OAUTH2_KEY = os.getenv('VK_APP_ID')  # На dev.vk.com созда
 SOCIAL_AUTH_VK_OAUTH2_SECRET = os.getenv('VK_APP_PROTECTED_KEY')  # Там же скопировать 'Защищённый ключ'
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.vk.VKOAuth2',
+    'social_core.backends.yandex.YandexOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 
 )
@@ -223,3 +227,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 SOCIAL_AUTH_INACTIVE_USER_URL = '/inactive-user/'
 SOCIAL_AUTH_USER_MODEL = 'backend.User'
+
+# yandex social auth
+SOCIAL_AUTH_YANDEX_OAUTH2_KEY = os.getenv('YA_APP_ID')
+SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = os.getenv('YA_APP_PROTECTED_KEY')
